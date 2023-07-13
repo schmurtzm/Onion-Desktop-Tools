@@ -1,0 +1,2 @@
+"RMPARTUSB LIST" command has a proper output with recent version.
+But recent version of RMPARTUSB always create an hidden boot partition so we create partitions with an old version.

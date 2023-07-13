@@ -1,0 +1,115 @@
+{
+  "Onion_Configuration": {
+    "System": [
+      {
+        "filename": ".noMenuHaptics",
+        "short_description": "Disable Menu button vibration",
+        "description": "When checked, the vibration of the Menu button will be disabled.",
+        "sub_option": 0
+      },
+      {
+        "filename": ".noLowBatteryAutoSave",
+        "short_description": "Disable auto save on low battery.",
+        "description": "If enabled, the console will not auto save and quit on low battery.",
+        "sub_option": 0
+      },
+      {
+        "filename": ".logging",
+        "short_description": "Log events in log files.",
+        "description": "If enabled logs will be dumped into .tmp_update/logs",
+        "sub_option": 0
+      }
+    ],
+    "Time": [
+    {
+      "filename": ".ntpState",
+      "short_description": "Set date and time from internet",
+      "description": "When checked, you have to set manually the time zone in Onion Tools app (on the console).\nIf you're not behind a VPN.\n(we recommend to disable it to sync time on your MMP thanks to an http API)",
+      "sub_option": 0
+    },
+      {
+        "filename": ".manual_tz",
+        "short_description": "Set time zone manually",
+        "description": "When checked, you have to set manually the time zone in Onion Tools app (on the console).\nIf you're not behind a VPN, we recommend to disable it to sync your time zone on your MMP thanks to an http API.\n(Disabled recommended, except if your time zone is not good)) ",
+        "sub_option": 0
+      },
+      {
+        "filename": ".ntpWait",
+        "short_description": "Wait for NTP.",
+        "description": "If enabled, the time will be set with NTP (recommended disabled, longer than with http API).",
+        "sub_option": 0
+      }
+    ],
+    "User interface": [
+      {
+        "filename": ".showExpert",
+        "short_description": "Show expert section",
+        "description": "When checked, the expert icon will appear on MainUI.",
+        "sub_option": 0
+      },
+      {
+        "filename": ".showRecents",
+        "short_description": "Show recents section",
+        "description": "When checked, the recent icon will appear on MainUI.",
+        "sub_option": 0
+      }
+
+    ],
+    "Network": [
+      {
+        "filename": ".hotspotState",
+        "short_description": "Hotspot",
+        "description": "Description détaillée du fichier 2",
+        "sub_option": 0
+      },
+      {
+        "filename": ".httpState",
+        "short_description": "http Web-based file manager ",
+        "description": "Based on filebrowser. When enabled a web server will be hosted on your mini.\n You can connect on it from your computer by typing http://ip_of_your_mini. \nIt allows to copy files and folder and is very handy for devs as a script editor is integrated.\nHowever HTTP filebrowser use a lot of memory so think about disabling it\nwhen you don't use it or when you run demanding games.\nFor a long transfert with many files you'll prefer FTP or SSH server.",
+        "sub_option": 0
+      },
+      {
+        "filename": ".authhttpState",
+        "short_description": "http authentification",
+        "description": "Description détaillée du fichier 2",
+        "sub_option": 1
+      },
+      {
+        "filename": ".ftpState",
+        "short_description": "FTP server",
+        "description": "Description détaillée du fichier 2",
+        "sub_option": 0
+      },
+      {
+        "filename": ".authftpState",
+        "short_description": "FTP authentification",
+        "description": "test\ntest",
+        "sub_option": 1
+      },
+      {
+        "filename": ".sshState",
+        "short_description": "SSH server",
+        "description": "Description détaillée du fichier 2",
+        "sub_option": 0
+      },
+      {
+        "filename": ".authsshState",
+        "short_description": "SSH authentification",
+        "description": "Description détaillée du fichier 2",
+        "sub_option": 1
+      },
+      {
+        "filename": ".telnetState",
+        "short_description": "Telnet",
+        "description": "Description détaillée du fichier 2",
+        "sub_option": 0
+      },
+      {
+        "filename": ".authtelnetState",
+        "short_description": "Telnet authentification",
+        "description": "Description détaillée du fichier 2",
+        "sub_option": 1
+      }
+    ]
+  }
+}
