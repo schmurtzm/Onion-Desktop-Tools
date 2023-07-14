@@ -10,7 +10,7 @@ if (-not $Drive_Letter) {
     $selectedTagSplitted = $selectedTag.Split(",")
     $Drive_Number = $($selectedTagSplitted[0])
     $Drive_Letter = $($selectedTagSplitted[1])
-    # $Target = "$Drive_Letter`:"
+    $Target = "$Drive_Letter`:"
 }
 
 
@@ -182,7 +182,7 @@ function Get_Version {
                 #################### previous Stock ####################
                 Write-Host "It seems to be a stock SD card from Miyoo"
                 $script:SdCardState = "Stock"
-                $Backup_Lbl.Text = "Miyoo Stock OS on ${Drive_Letter}"
+                $Backup_Lbl.Text = "Miyoo Stock OS on ${Drive_Letter}:"
                 $checkBox_Retroarch.Enabled = 0
                 $checkBox_Saves.Enabled = 0
                 $checkBox_OnionConfigFlags.Enabled = 0
@@ -497,7 +497,7 @@ elseif ($script:SdCardState -eq "Onion_InstallPending") {
     $form.Icon = $icon  
 }
 elseif ($script:SdCardState -eq "Stock") {
-    $Backup_Lbl.Text = "Miyoo Stock OS on ${Drive_Letter}"
+    $Backup_Lbl.Text = "Miyoo Stock OS on ${Drive_Letter}:"
     $checkBox_Retroarch.Enabled = 0
     $checkBox_Saves.Enabled = 0
     $checkBox_OnionConfigFlags.Enabled = 0

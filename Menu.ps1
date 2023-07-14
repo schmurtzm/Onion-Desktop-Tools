@@ -1,5 +1,4 @@
-
-# Onion-Desktop-Tools-v0.0.1
+# Onion-Desktop-Tools-v0.0.2
 param (
     [Parameter(Mandatory = $false)]
     [string]$HighDPI
@@ -132,7 +131,14 @@ $OKButton_Click = {
         if ($selectedOption -eq $BackupRestoreRadioButton1.Text) {
             $CurrentDrive = Get_Drive "Select a drive to backup"
             if ($CurrentDrive -ne $null) {
-                . "$PSScriptRoot\Onion_Save_Backup.ps1" -Drive_Number $CurrentDrive[0]
+                . "$PSScriptRoot\Onion_Save_Backup.ps1" $CurrentDrive[1]
+            }
+        }
+
+        if ($selectedOption -eq $BackupRestoreRadioButton2.Text) {
+            $CurrentDrive = Get_Drive "Select a destination drive"
+            if ($CurrentDrive -ne $null) {
+                . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
             }
         }
              

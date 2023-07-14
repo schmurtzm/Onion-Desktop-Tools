@@ -199,7 +199,7 @@ function Show-Form {
 $configContent = Get-Content -Raw -Path $configFile | ConvertFrom-Json
 
 # Chemin du répertoire où se trouvent les fichiers
-$directory = "G:\.tmp_update\config"
+$directory = "$Target\.tmp_update\config"
 
 # Afficher la fenêtre Windows Form
 Show-Form

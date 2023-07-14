@@ -1,4 +1,35 @@
 # Wifi
+
+param (
+    [Parameter(Mandatory = $false)]
+    [string]$Target
+)
+
+$SdCard_Version = ""
+$SdCardState = ""
+$ScriptPath = $MyInvocation.MyCommand.Path
+$ScriptDirectory = Split-Path $ScriptPath -Parent
+Set-Location -Path $ScriptDirectory
+
+
+if (-not $Target) {
+    . "$PSScriptRoot\Disk_selector.ps1"
+    if ($selectedTag -ne "") {
+        $selectedTagSplitted = $selectedTag.Split(",")
+        $Drive_Number = $($selectedTagSplitted[0])
+        $Drive_Letter = $($selectedTagSplitted[1])
+        $Target = "$Drive_Letter`:"
+        Write-Host "Selected Tag: $selectedTag"
+        Write-Host "Disk Number: $Drive_Number"
+        Write-Host "Disk Letter: $Drive_Letter"
+    }
+    else {
+        return
+    }
+
+}
+
+
 Add-Type -AssemblyName System.Windows.Forms
 
 # Création du formulaire
@@ -63,8 +94,8 @@ if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
     $password = $textboxPassword.Text
 
     # Renommer le fichier runtime.sh en runtime_ori.sh
-    $sourceFilePath = "G:\.tmp_update\runtime.sh"
-    $targetFilePath = "G:\.tmp_update\runtime_ori.sh"
+    $sourceFilePath = "$Target\.tmp_update\runtime.sh"
+    $targetFilePath = "$Target\.tmp_update\runtime_ori.sh"
     if (Test-Path $sourceFilePath) {
 
         if (-not (Test-Path $targetFilePath)) {
@@ -86,7 +117,7 @@ mv "/mnt/SDCARD/.tmp_update/runtime_ori.sh" "/mnt/SDCARD/.tmp_update/runtime.sh"
     
         # Écrire le contenu dans le fichier runtime.sh
         $runtimeContent = $runtimeContent -replace "`r`n", "`n"  # Remplace les CRLF par LF
-        $runtimeContent | Out-File -FilePath "G:\.tmp_update\runtime.sh" -Encoding utf8 -NoNewline
+        $runtimeContent | Out-File -FilePath "$Target\.tmp_update\runtime.sh" -Encoding utf8 -NoNewline
         
     }
     else {
@@ -105,7 +136,7 @@ cd /mnt/SDCARD/miyoo/app
 "@
 
 $updaterContent = $updaterContent -replace "`r`n", "`n"  # Remplace les CRLF par LF
-        $updaterContent | Out-File -FilePath "G:\.tmp_update\updater" -Encoding utf8 -NoNewline
+        $updaterContent | Out-File -FilePath "$Target\.tmp_update\updater" -Encoding utf8 -NoNewline
         
     }
 }

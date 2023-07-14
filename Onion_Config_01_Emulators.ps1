@@ -1,5 +1,33 @@
 # Emulators and apps
 
+param (
+    [Parameter(Mandatory = $false)]
+    [string]$Target
+)
+
+$SdCard_Version = ""
+$SdCardState = ""
+$ScriptPath = $MyInvocation.MyCommand.Path
+$ScriptDirectory = Split-Path $ScriptPath -Parent
+Set-Location -Path $ScriptDirectory
+
+
+if (-not $Target) {
+    . "$PSScriptRoot\Disk_selector.ps1"
+    if ($selectedTag -ne "") {
+        $selectedTagSplitted = $selectedTag.Split(",")
+        $Drive_Number = $($selectedTagSplitted[0])
+        $Drive_Letter = $($selectedTagSplitted[1])
+        $Target = "$Drive_Letter`:"
+        Write-Host "Selected Tag: $selectedTag"
+        Write-Host "Disk Number: $Drive_Number"
+        Write-Host "Disk Letter: $Drive_Letter"
+    }
+    else {
+        return
+    }
+
+}
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName Microsoft.VisualBasic
@@ -16,7 +44,7 @@ function FillTable {
         [string]$PackType
     )
 
-    $PacksrootPath = "G:\App\PackageManager\data\$PackType\"
+    $PacksrootPath = "$Target\App\PackageManager\data\$PackType\"
 
     # App\PackageManager\data\Emu\Atari - 2600 (Stella 2014)\Emu
     # App\PackageManager\data\$PackType\$PackName\$PackContent
@@ -56,15 +84,15 @@ function FillTable {
                     $cell4.Value = $romSubDirectory.name
                 }
 
-                if (Test-Path "G:\$PackType\$PackContent" -PathType Container) {
-                    Write-Output "G:\$PackType\$PackContent"
+                if (Test-Path "$Target\$PackType\$PackContent" -PathType Container) {
+                    Write-Output "$Target\$PackType\$PackContent"
                     $row.DefaultCellStyle.BackColor = "Green"
                     $global:rowCountGreen++
                 }
                 else {
                     $GamesNumber = 0 
-                    if (Test-Path "G:\Roms\$romSubDirectory" -PathType Container) {
-                        $games = Get-ChildItem -Path "G:\Roms\$romSubDirectory"
+                    if (Test-Path "$Target\Roms\$romSubDirectory" -PathType Container) {
+                        $games = Get-ChildItem -Path "$Target\Roms\$romSubDirectory"
                         $GamesNumber = $games.Count
                     }
 
@@ -82,8 +110,8 @@ function FillTable {
             else {
                 if ( $PackContent.Name -ne "romscripts") {
                     # no roms folder, it can be an app
-                    if (Test-Path "G:\$PackType\$PackContent" -PathType Container) {
-                        Write-Output "G:\$PackType\$PackContent"
+                    if (Test-Path "$Target\$PackType\$PackContent" -PathType Container) {
+                        Write-Output "$Target\$PackType\$PackContent"
                         $row.DefaultCellStyle.BackColor = "Green"
                         $global:rowCountGreen++
                     }
@@ -114,7 +142,7 @@ function Get-SubDirectories {
         [string]$PackType
     )
 
-    $rootPath = "G:\App\PackageManager\data\$PackType\"
+    $rootPath = "$Target\App\PackageManager\data\$PackType\"
     $directories = Get-ChildItem -Path $rootPath -Directory
 
     foreach ($directory in $directories) {
@@ -148,7 +176,7 @@ $DataGrid_CellDoubleClick = {
 
     if ($columnIndex -eq 2) {
         #  to handle "Emu Folder" column cell click event 
-        $emuFolderPath = "G:\Emu\$SelEmuFolder"
+        $emuFolderPath = "$Target\Emu\$SelEmuFolder"
         if (Test-Path $emuFolderPath -PathType Container) {
             Invoke-Item -Path $emuFolderPath
         }
@@ -160,7 +188,7 @@ $DataGrid_CellDoubleClick = {
 
     if ($columnIndex -eq 3) {
         #  to handle "Rom Folder" column cell click event 
-        $RomFolderPath = "G:\Roms\$SelRomFolder"
+        $RomFolderPath = "$Target\Roms\$SelRomFolder"
         if (Test-Path $RomFolderPath -PathType Container) {
             Invoke-Item -Path $RomFolderPath
         }
@@ -179,12 +207,12 @@ $DataGrid_CellDoubleClick = {
     if ($columnIndex -eq 0) {
         #  to handle "Emu Folder" column cell click event 
 
-        $message = "Copy content of `G:\App\PackageManager\data\$SelType\$SelName` to the root of G:"
+        $message = "Copy content of `$Target\App\PackageManager\data\$SelType\$SelName` to the root of $Target"
     
         $result = [Microsoft.VisualBasic.Interaction]::MsgBox($message, [Microsoft.VisualBasic.MsgBoxStyle]::YesNo, "Confirmation")
         if ($result -eq [Microsoft.VisualBasic.MsgBoxResult]::Yes) {
-            $sourcePath = "G:\App\PackageManager\data\$SelType\$SelName\*"
-            $destinationPath = "G:\"
+            $sourcePath = "$Target\App\PackageManager\data\$SelType\$SelName\*"
+            $destinationPath = "$Target\"
         
             Copy-Item -Path $sourcePath -Destination $destinationPath -Recurse -Force
             
@@ -217,8 +245,8 @@ $InstallButton_Click = {
                 $emuFolderValue = $row.Cells[2].Value
                 $romFolderValue = $row.Cells[3].Value
 
-                $sourcePath = "G:\App\PackageManager\data\$sourceValue\$folderValue\*"
-                $destinationPath = "G:\"
+                $sourcePath = "$Target\App\PackageManager\data\$sourceValue\$folderValue\*"
+                $destinationPath = "$Target\"
         
                 Copy-Item -Path $sourcePath -Destination $destinationPath -Recurse -Force
                 Write-Host "******************** copying `"$sourcePath`" content to :`n$destinationPath"
@@ -252,8 +280,8 @@ $AutoInstallButton_Click = {
                 $emuFolderValue = $row.Cells[2].Value
                 $romFolderValue = $row.Cells[3].Value
 
-                $sourcePath = "G:\App\PackageManager\data\$sourceValue\$folderValue\*"
-                $destinationPath = "G:\"
+                $sourcePath = "$Target\App\PackageManager\data\$sourceValue\$folderValue\*"
+                $destinationPath = "$Target\"
         
                 Copy-Item -Path $sourcePath -Destination $destinationPath -Recurse -Force
                 Write-Host "******************** copying `"$sourcePath`" content to :`n$destinationPath"
@@ -291,7 +319,7 @@ $UninstallButton_Click = {
                 $emuFolderValue = $row.Cells[2].Value
                 $romFolderValue = $row.Cells[3].Value
 
-                $sourcePath = "G:\$sourceValue\$emuFolderValue"
+                $sourcePath = "$Target\$sourceValue\$emuFolderValue"
         
                 Remove-Item -Path $sourcePath  -Recurse -Force
                 Write-Host "******************** Removing `"$sourcePath`""
