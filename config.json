@@ -59,55 +59,67 @@
       {
         "filename": ".hotspotState",
         "short_description": "Hotspot",
-        "description": "Description détaillée du fichier 2",
+        "description": "Your Miyoo Mini Plus just got a lot more portable. SSH/Telnet, HTTP fileserver, FTP on the go, no extra devices needed.\nStay connected with ease, anytime, anywhere. Compatible with netplay (best paired with Easy Netplay).\nThere are reports of issues with hotspot on firmware levels below 0505.",
         "sub_option": 0
       },
       {
+        "filename": ".smbdState",
+        "short_description": "Samba : Network file share",
+        "description": "The Samba (SMB) is a file sharing protocol that provides integrated sharing of files\nand directories between your Miyoo Mini plus and your PC (Windows/Unix/Linux).\nIt enables easy access, allowing you to share, access, and modify files as\nif they were stored locally on your PC.",
+        "sub_option": 0
+      },
+      {
+        "filename": ".authsmbdState",
+        "short_description": "Samba authentification",
+        "description": "Enable authentification for Samba",
+        "sub_option": 1
+      },
+      {
         "filename": ".httpState",
-        "short_description": "http Web-based file manager ",
+        "short_description": "http Web-based file manager",
         "description": "Based on filebrowser. When enabled a web server will be hosted on your mini.\n You can connect on it from your computer by typing http://ip_of_your_mini. \nIt allows to copy files and folder and is very handy for devs as a script editor is integrated.\nHowever HTTP filebrowser use a lot of memory so think about disabling it\nwhen you don't use it or when you run demanding games.\nFor a long transfert with many files you'll prefer FTP or SSH server.",
         "sub_option": 0
       },
       {
         "filename": ".authhttpState",
         "short_description": "http authentification",
-        "description": "Description détaillée du fichier 2",
+        "description": "Enable authentification for http server",
         "sub_option": 1
       },
       {
         "filename": ".ftpState",
         "short_description": "FTP server",
-        "description": "Description détaillée du fichier 2",
+        "description": "Much like the HTTP server, FTP provides a method of transferring files between\nyour Miyoo Mini+ and other devices such as a PC/Phone/Tablet.\nYou'll need an FTP client installed on the second device.",
         "sub_option": 0
       },
       {
         "filename": ".authftpState",
         "short_description": "FTP authentification",
-        "description": "test\ntest",
+        "description": "Enable authentification for FTP server",
         "sub_option": 1
       },
       {
         "filename": ".sshState",
         "short_description": "SSH server",
-        "description": "Description détaillée du fichier 2",
+        "description": "SSH provides a secure command line method to communicate with your Miyoo Mini+.\nSFTP provides a secure file transfer method",
         "sub_option": 0
       },
       {
         "filename": ".authsshState",
         "short_description": "SSH authentification",
-        "description": "Description détaillée du fichier 2",
+        "description": "Enable authentification for SSH server",
         "sub_option": 1
       },
       {
         "filename": ".telnetState",
         "short_description": "Telnet",
-        "description": "Description détaillée du fichier 2",
+        "description": "Telnet provides an unencrypted command line method to communicate with your Miyoo Mini+.",
         "sub_option": 0
       },
       {
         "filename": ".authtelnetState",
         "short_description": "Telnet authentification",
-        "description": "Description détaillée du fichier 2",
+        "description": "Enable authentification for Telnet server",
         "sub_option": 1
       }
     ]

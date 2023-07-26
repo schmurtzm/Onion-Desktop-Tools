@@ -217,8 +217,8 @@ function Button_Click {
 
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "Decompression successful."
-                Write-Host "`n`nUpdate $Release_Version applied.`nRebooting to run installation!`n"
-                $label_right.Text += "`r`nExtraction successful"
+                Write-Host "`n`nUpdate $Release_Version applied.`nInsert SD card in your Miyoo and start it to run installation!`n"
+                $label_right.Text += "`r`nExtraction successful !`nYou can now close this Windows.`nInsert this SD card in your Miyoo to start Installation."
             }
             else {
                 Write-Host "`n`nError: Something went wrong during decompression.`nTry to run OTA update again or make a manual update.`nInstallation stopped."

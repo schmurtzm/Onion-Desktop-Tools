@@ -1,4 +1,4 @@
-#Onion Configuration
+#Onion OS Configuration
 
 param (
     [Parameter(Mandatory = $false)]
@@ -106,11 +106,14 @@ $configFile = "config.json"
 function Show-Form {
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "Configuration Onion"
-    $form.Size = New-Object System.Drawing.Size(400, 300)
+    $form.Size = New-Object System.Drawing.Size(400, 350)
     $form.StartPosition = "CenterScreen"
+    $iconPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\res\onion.ico"
+    $icon = New-Object System.Drawing.Icon($iconPath)
+    $form.Icon = $icon
 
     $tabControl = New-Object System.Windows.Forms.TabControl
-    $tabControl.Size = New-Object System.Drawing.Size(380, 200)
+    $tabControl.Size = New-Object System.Drawing.Size(380, 250)
     $tabControl.Dock = "Fill"
 
     # Ajouter les sous-sections en tant que groupes d'onglets
@@ -120,7 +123,7 @@ function Show-Form {
 
         $panel = New-Object System.Windows.Forms.Panel
         $panel.Location = New-Object System.Drawing.Point(10, 10)
-        $panel.Size = New-Object System.Drawing.Size(300, 200)
+        $panel.Size = New-Object System.Drawing.Size(300, 250)
         $panel.AutoScroll = $true
 
         $currentY = 10

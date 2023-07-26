@@ -11,7 +11,7 @@ Set-Location -Path $ScriptDirectory
 Add-Type -AssemblyName System.Windows.Forms
 
 if ($HighDPI -eq 1) {
-    #scaling
+    # Scaling
     ##################################################
     # $DPISetting = (Get-ItemProperty 'HKCU:\Control Panel\Desktop\WindowMetrics' -Name AppliedDPI).AppliedDPI
     # $dpiKoef = $DPISetting / 96
@@ -27,27 +27,26 @@ if ($HighDPI -eq 1) {
     [void] [DPIAware]::SetProcessDPIAware() 
 }
 
-# create environnement
+# Create environment
 
 
-
-# Cr�ation de la fen�tre principale
+# Create main window
 $Form = New-Object System.Windows.Forms.Form
 $Form.Text = "Onion Desktop Tools"
-$Form.Size = New-Object System.Drawing.Size(500  , 320 )
+$Form.Size = New-Object System.Drawing.Size(500, 320)
 $form.StartPosition = "CenterScreen"
-$iconPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\res\OnionInstaller.ico"
+$iconPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\res\onion.ico"
 $icon = New-Object System.Drawing.Icon($iconPath)
 $form.Icon = $icon
 
 $Form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
 $Form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 
-# Cr�ation du contr�le TabControl
+# Create TabControl control
 $TabControl = New-Object System.Windows.Forms.TabControl
 $TabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 
-# Fonction pour obtenir l'option coch�e de l'onglet courant
+# Function to get the selected option from the current tab
 function GetSelectedOption {
     $currentTab = $TabControl.SelectedTab
 
@@ -55,7 +54,7 @@ function GetSelectedOption {
         if ($control.GetType().Name -eq "GroupBox") {
             foreach ($radioButton in $control.Controls) {
                 if ($radioButton.Checked) {
-                    return $radioButton.Text
+                    return $radioButton
                 }
             }
         }
@@ -64,82 +63,102 @@ function GetSelectedOption {
     return $null
 }
 
-# Ajouter l'�v�nement Click pour le bouton "OK"
+# Add Click event for the "OK" button
 $OKButton_Click = {
     $selectedOption = GetSelectedOption
 
     if ($selectedOption -ne $null) {
-        Write-Host "Selected option in '$($TabControl.SelectedTab.Text)': $selectedOption"
+        Write-Host "Selected option in '$($TabControl.SelectedTab.Text)': $selectedOption.text"
         Write-Host "$PSScriptRoot"
         #$scriptPath = Join-Path $PSScriptRoot "downloadupdate.ps1"
 
-        if ($selectedOption -eq $InstallUpdateRadioButton0.Text) {
-            #Install / Upgrade / Reinstall Onion without formating SD card
+        if ($TabControl.SelectedTab -eq $OnionConfigTab) {
+            # Special case for Onion Configuration tab (we run the script contained in the tag of the radio button)
+            $OKButton.Enabled = 0
+            & $selectedOption.Tag
+            $OKButton.Enabled = 1
+        }
+
+        if ($selectedOption.text -eq $InstallUpdateRadioButton0.Text) {
+            # Install / Upgrade / Reinstall Onion without formatting SD card
+            $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select target drive for Onion"
             if ($CurrentDrive -ne $null) {
                 Write-Host "{$CurrentDrive[1]}:"
                 . "$PSScriptRoot\Onion_Install_Download.ps1"
                 . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
             }
+            $OKButton.Enabled = 1
         }
         
-
-        if ($selectedOption -eq $InstallUpdateRadioButton1.Text) {
+        if ($selectedOption.text -eq $InstallUpdateRadioButton1.Text) {
             # "Format SD card and install Onion"
+            $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select target drive for Onion"
             if ($CurrentDrive -ne $null) {
-                # Sometime a scandisk is required to format 
+                # Sometimes a scandisk is required to format 
                 # $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
                 # $wgetProcess.WaitForExit()
                 . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
                 . "$PSScriptRoot\Onion_Install_Download.ps1"
                 . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
             }
+            $OKButton.Enabled = 1
         }
 
-        if ($selectedOption -eq $InstallUpdateRadioButton2.Text) {
+        if ($selectedOption.text -eq $InstallUpdateRadioButton2.Text) {
             # "Format SD card and install Onion"
+            $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select stock SD card"
             if ($CurrentDrive -ne $null) {
                 . "$PSScriptRoot\Onion_Save_Backup.ps1" -Drive_Number $CurrentDrive[0]
             }
             $CurrentDrive = Get_Drive "Select target drive for Onion"
             if ($CurrentDrive -ne $null) {
-                # Sometime a scandisk is required to format 
+                # Sometimes a scandisk is required to format 
                 # $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
                 # $wgetProcess.WaitForExit()
                 . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
                 . "$PSScriptRoot\Onion_Install_Download.ps1"
                 . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
             }
+            $OKButton.Enabled = 1
         }
-        if ($selectedOption -eq "Check for errors (scandisk)") {
+        if ($selectedOption.text -eq "Check for errors (scandisk)") {
+            $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select a drive to check"
             if ($CurrentDrive -ne $null) {
                 $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
                 $wgetProcess.WaitForExit()
             }
+            $OKButton.Enabled = 1
         }
 
-        if ($selectedOption -eq "Format SD card in FAT32") {
+        if ($selectedOption.text -eq "Format SD card in FAT32") {
+            $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select a drive to format"
             if ($CurrentDrive -ne $null) {
                 . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[1]
             }
+            $OKButton.Enabled = 1
         }
 
-        if ($selectedOption -eq $BackupRestoreRadioButton1.Text) {
+        if ($selectedOption.text -eq $BackupRestoreRadioButton1.Text) {
+            $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select a drive to backup"
             if ($CurrentDrive -ne $null) {
                 . "$PSScriptRoot\Onion_Save_Backup.ps1" $CurrentDrive[1]
             }
+            $OKButton.Enabled = 1
         }
 
-        if ($selectedOption -eq $BackupRestoreRadioButton2.Text) {
+        if ($selectedOption.text -eq $BackupRestoreRadioButton2.Text) {
+            $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select a destination drive"
             if ($CurrentDrive -ne $null) {
                 . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
             }
+            $OKButton.Enabled = 1
         }
              
     }
@@ -164,29 +183,27 @@ function Get_Drive($Title) {
     }
 }
 
-
-# Onglet "Install and Update Onion"
+# Tab "Install and Update Onion"
 $InstallUpdateTab = New-Object System.Windows.Forms.TabPage
 $InstallUpdateTab.Text = "Install and Update Onion"
 $TabControl.TabPages.Add($InstallUpdateTab)
 
-# Cr�ation du contr�le GroupBox pour l'onglet "Install and Update Onion"
+# Create GroupBox control for the "Install and Update Onion" tab
 $InstallUpdateGroupBox = New-Object System.Windows.Forms.GroupBox
 $InstallUpdateGroupBox.Location = New-Object System.Drawing.Point(20, 20)
 $InstallUpdateGroupBox.Size = New-Object System.Drawing.Size(440, 200)
 $InstallUpdateTab.Controls.Add($InstallUpdateGroupBox)
 
-# Ajouter les boutons � bascule dans le GroupBox
+# Add radio buttons to the GroupBox
 $InstallUpdateRadioButton0 = New-Object System.Windows.Forms.RadioButton
 $InstallUpdateRadioButton0.Location = New-Object System.Drawing.Point(20, 30)
 $InstallUpdateRadioButton0.Size = New-Object System.Drawing.Size(380, 20)
-$InstallUpdateRadioButton0.Text = "Install / Upgrade / Reinstall Onion without formating SD card"
+$InstallUpdateRadioButton0.Text = "Install / Upgrade / Reinstall Onion (without formatting SD card)"
 $InstallUpdateGroupBox.Controls.Add($InstallUpdateRadioButton0)
 $tooltip = New-Object System.Windows.Forms.ToolTip
-$tooltip.SetToolTip($InstallUpdateRadioButton0, "This will download and update Onion. It will keep your data`n(including roms, saves and retroarch configuration)")
+$tooltip.SetToolTip($InstallUpdateRadioButton0, "This will download and update Onion. It will keep your data`n(including ROMs, saves, and RetroArch configuration)")
 
-
-# Ajouter les boutons � bascule dans le GroupBox
+# Add radio buttons to the GroupBox
 $InstallUpdateRadioButton1 = New-Object System.Windows.Forms.RadioButton
 $InstallUpdateRadioButton1.Location = New-Object System.Drawing.Point(20, 60)
 $InstallUpdateRadioButton1.Size = New-Object System.Drawing.Size(380, 20)
@@ -195,85 +212,80 @@ $InstallUpdateGroupBox.Controls.Add($InstallUpdateRadioButton1)
 $tooltip = New-Object System.Windows.Forms.ToolTip
 $tooltip.SetToolTip($InstallUpdateRadioButton1, "This will format your SD card in FAT32`n(all the data on the SD card will be deleted),`nThen it will download and install Onion on your SD Card.")
 
-
 $InstallUpdateRadioButton2 = New-Object System.Windows.Forms.RadioButton
 $InstallUpdateRadioButton2.Location = New-Object System.Drawing.Point(20, 90)
 $InstallUpdateRadioButton2.Size = New-Object System.Drawing.Size(380, 20)
 $InstallUpdateRadioButton2.Text = "Migrate stock SD card to a new SD card with Onion"
 $InstallUpdateGroupBox.Controls.Add($InstallUpdateRadioButton2)
-$tooltip.SetToolTip($InstallUpdateRadioButton2, "This is a complete migration procedure for Onion.`nIt will backup your Miyoo stock SD card (bios, roms and saves)`nthen it will format your new SD card in FAT32, download and`ninstall Onion and then restore your stock backup data.")
+$tooltip.SetToolTip($InstallUpdateRadioButton2, "This is a complete migration procedure for Onion.`nIt will backup your Miyoo stock SD card (bios, ROMs, and saves)`nthen it will format your new SD card in FAT32, download and`ninstall Onion, and then restore your stock backup data.")
 
-
-
-# Onglet "Other Tools"
+# Tab "Onion configuration"
 $OnionConfigTab = New-Object System.Windows.Forms.TabPage
 $OnionConfigTab.Text = "Onion configuration"
 $TabControl.TabPages.Add($OnionConfigTab)
 
-
-# Création du contrôle GroupBox pour l'onglet "Onion configuration"
+# Create GroupBox control for the "Onion configuration" tab
 $OnionConfigGroupBox = New-Object System.Windows.Forms.GroupBox
 $OnionConfigGroupBox.Location = New-Object System.Drawing.Point(20, 20)
 $OnionConfigGroupBox.Size = New-Object System.Drawing.Size(440, 200)
 $OnionConfigTab.Controls.Add($OnionConfigGroupBox)
 
-# Récupération des fichiers de configuration Onion
+# Retrieve Onion configuration files
 $onionConfigFiles = Get-ChildItem -Path $PSScriptRoot -Filter "Onion_Config_*.ps1"
 
-# Position initiale des boutons
-$buttonLeft = 20
-$buttonTop = 30
-$buttonMargin = 10
+# Initial position of radio buttons
+$radioButtonLeft = 20
+$radioButtonTop = 30
+$radioButtonMargin = 10
 
-# Création des boutons pour chaque fichier de configuration Onion
+# Create radio buttons for each Onion configuration file
 foreach ($configFile in $onionConfigFiles) {
-    # Lecture de la première ligne en commentaire pour le nom du bouton
-    $buttonText = Get-Content -Path $configFile.FullName | Where-Object { $_ -match "^#" } | Select-Object -First 1 | ForEach-Object { $_ -replace "#", "" }
+    # Read the first line as a comment to get the radio button name
+    $radioButtonText = Get-Content -Path $configFile.FullName | Where-Object { $_ -match "^#" } | Select-Object -First 1 | ForEach-Object { $_ -replace "#", "" }
 
-    # Création du bouton
-    $button = New-Object System.Windows.Forms.Button
-    $button.Text = $buttonText
-    $button.Tag = $configFile.FullName
-    $button.SetBounds($buttonLeft, $buttonTop, 250, 20)
-    $button.Add_Click({
-            $clickedButton = $this
-            & $clickedButton.Tag
-        })
+    # Create the radio button
+    $radioButton = New-Object System.Windows.Forms.RadioButton
+    $radioButton.Text = $radioButtonText
+    $radioButton.Tag = $configFile.FullName
+    $radioButton.Location = New-Object System.Drawing.Point($radioButtonLeft, $radioButtonTop)
+    $radioButton.Size = New-Object System.Drawing.Size(250, 20)
+    $radioButtonTop += $radioButton.Height + $radioButtonMargin
+
+    # $radioButton.Add_Click({
+    #     $clickedRadioButton = $this
+    #     & $clickedRadioButton.Tag
+    # })
 
     Write-Host "$configFile.FullName"
 
-    $OnionConfigGroupBox.Controls.Add($button)
-
-    # Mise à jour des positions pour le prochain bouton
-    $buttonTop += $button.Height + $buttonMargin
+    $OnionConfigGroupBox.Controls.Add($radioButton)
 }
 
-# Redimensionnement du groupe OnionConfigGroupBox en fonction des boutons
-# $OnionConfigGroupBox.Height = $buttonTop + $buttonMargin
+# Resize the OnionConfigGroupBox based on the radio buttons
+# $OnionConfigGroupBox.Height = $radioButtonTop + $radioButtonMargin
 
 
 
 
-#$InstallUpdateRadioButton3 = New-Object System.Windows.Forms.RadioButton
-#$InstallUpdateRadioButton3.Location = New-Object System.Drawing.Point(20, 120)
-#$InstallUpdateRadioButton3.Size = New-Object System.Drawing.Size(380, 20)
-#$InstallUpdateRadioButton3.Text = "Install Onion on existing SD card"
-#$InstallUpdateGroupBox.Controls.Add($InstallUpdateRadioButton3)
-#$tooltip.SetToolTip($InstallUpdateRadioButton3, "This will move your current SD card files in`na sub directory and install a new Onion on your SD Card.`nThis option is useful for testing and allows an`neasy roll back if needed.")
+# $InstallUpdateRadioButton3 = New-Object System.Windows.Forms.RadioButton
+# $InstallUpdateRadioButton3.Location = New-Object System.Drawing.Point(20, 120)
+# $InstallUpdateRadioButton3.Size = New-Object System.Drawing.Size(380, 20)
+# $InstallUpdateRadioButton3.Text = "Install Onion on existing SD card"
+# $InstallUpdateGroupBox.Controls.Add($InstallUpdateRadioButton3)
+# $tooltip.SetToolTip($InstallUpdateRadioButton3, "This will move your current SD card files in`na sub directory and install a new Onion on your SD Card.`nThis option is useful for testing and allows an`neasy roll back if needed.")
 
-
-# Onglet "Backup and Restore Onion"
+# Tab "Backup and Restore Onion"
 $BackupRestoreTab = New-Object System.Windows.Forms.TabPage
 $BackupRestoreTab.Text = "Backup and Restore Onion"
 $TabControl.TabPages.Add($BackupRestoreTab)
 
-# Cr�ation du contr�le GroupBox pour l'onglet "Backup and Restore Onion"
+# Create GroupBox control for the "Backup and Restore Onion" tab
 $BackupRestoreGroupBox = New-Object System.Windows.Forms.GroupBox
 $BackupRestoreGroupBox.Location = New-Object System.Drawing.Point(20, 20)
 $BackupRestoreGroupBox.Size = New-Object System.Drawing.Size(440, 200)
 $BackupRestoreTab.Controls.Add($BackupRestoreGroupBox)
 
-# Ajouter les boutons � bascule dans le GroupBox
+# Add radio buttons to the GroupBox
 $BackupRestoreRadioButton1 = New-Object System.Windows.Forms.RadioButton
 $BackupRestoreRadioButton1.Location = New-Object System.Drawing.Point(20, 30)
 $BackupRestoreRadioButton1.Size = New-Object System.Drawing.Size(250, 20)
@@ -286,18 +298,18 @@ $BackupRestoreRadioButton2.Size = New-Object System.Drawing.Size(250, 20)
 $BackupRestoreRadioButton2.Text = "Restore a backup on Onion"
 $BackupRestoreGroupBox.Controls.Add($BackupRestoreRadioButton2)
 
-# Onglet "Other Tools"
+# Tab "Other Tools"
 $OtherToolsTab = New-Object System.Windows.Forms.TabPage
 $OtherToolsTab.Text = "SD card tools"
 $TabControl.TabPages.Add($OtherToolsTab)
 
-# Cr�ation du contr�le GroupBox pour l'onglet "Other Tools"
+# Create GroupBox control for the "Other Tools" tab
 $OtherToolsGroupBox = New-Object System.Windows.Forms.GroupBox
 $OtherToolsGroupBox.Location = New-Object System.Drawing.Point(20, 20)
 $OtherToolsGroupBox.Size = New-Object System.Drawing.Size(440, 200)
 $OtherToolsTab.Controls.Add($OtherToolsGroupBox)
 
-# Ajouter les boutons � bascule dans le GroupBox
+# Add radio buttons to the GroupBox
 # $OtherToolsRadioButton1 = New-Object System.Windows.Forms.RadioButton
 # $OtherToolsRadioButton1.Location = New-Object System.Drawing.Point(20, 30)
 # $OtherToolsRadioButton1.Size = New-Object System.Drawing.Size(250, 20)
@@ -316,12 +328,7 @@ $OtherToolsRadioButton3.Size = New-Object System.Drawing.Size(250, 20)
 $OtherToolsRadioButton3.Text = "Check for errors (scandisk)"
 $OtherToolsGroupBox.Controls.Add($OtherToolsRadioButton3)
 
-
-
-
-
-
-# Cr�ation du bouton "OK"
+# Create "OK" button
 $OKButton = New-Object System.Windows.Forms.Button
 $OKButton.Location = New-Object System.Drawing.Point(350, 200)
 $OKButton.Size = New-Object System.Drawing.Size(75, 23)
@@ -329,8 +336,8 @@ $OKButton.Text = "OK"
 $OKButton.Add_Click($OKButton_Click)
 $Form.Controls.Add($OKButton)
 
-# Ajouter le contr�le TabControl � la fen�tre principale
+# Add the TabControl control to the main window
 $Form.Controls.Add($TabControl)
 
-# Afficher la fen�tre
+# Show the window
 $Form.ShowDialog()

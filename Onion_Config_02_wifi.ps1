@@ -1,4 +1,4 @@
-# Wifi
+# Wifi settings
 
 param (
     [Parameter(Mandatory = $false)]

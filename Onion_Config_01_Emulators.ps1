@@ -1,4 +1,4 @@
-# Emulators and apps
+# Onion Emulators and apps Manager
 
 param (
     [Parameter(Mandatory = $false)]
@@ -11,7 +11,7 @@ $ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
 
-
+# $Target = "h:"
 if (-not $Target) {
     . "$PSScriptRoot\Disk_selector.ps1"
     if ($selectedTag -ne "") {
@@ -329,6 +329,10 @@ $UninstallButton_Click = {
     }
 }
 
+$HelpButton_Click = {
+    & ".\tools\res\Onion_Emulators_Manager_help.png"
+}
+
 $RefreshItems = {
     $global:rowCountWithoutColor = 0
     $global:rowCountGreen = 0
@@ -358,10 +362,12 @@ $RefreshItems = {
 
 # Create the form and controls
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Folder List"
+$form.Text = "Onion Emulators Manager"
 $form.Size = New-Object System.Drawing.Size(615, 800)
 $form.StartPosition = "CenterScreen"
-
+$iconPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\res\onion.ico"
+$icon = New-Object System.Drawing.Icon($iconPath)
+$form.Icon = $icon
 
 
 $dropDown = New-Object System.Windows.Forms.ComboBox
@@ -426,12 +432,23 @@ $AutoInstallButton.Text = "Auto-Install"
 $AutoInstallButton.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right
 $AutoInstallButton.add_Click($AutoInstallButton_Click)
 
+$checkBox = New-Object System.Windows.Forms.CheckBox
+$checkBox.Text = "Include experts"
+# $checkBox.Location = New-Object System.Drawing.Point($currentX, $currentY)
+$AutoInstallButton.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right
+$checkBox.AutoSize = $true
+
+
 
 $UninstallButton = New-Object System.Windows.Forms.Button
 $UninstallButton.Text = "Uninstall"
 $UninstallButton.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right
 $UninstallButton.add_Click($UninstallButton_Click)
 
+$HelpButton = New-Object System.Windows.Forms.Button
+$HelpButton.Text = "Help"
+$HelpButton.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Left
+$HelpButton.add_Click($HelpButton_Click)
 
 
 # Add TextBox for filtering
@@ -455,8 +472,10 @@ $tooltip = New-Object System.Windows.Forms.ToolTip
 $tooltip.SetToolTip($InstallButton, "This will install all the selected rows.`nUse the row selector at the left to select one or multiple rows firt.`n(Press control for multiple selection)`nThen click install button.")
 $tooltip.SetToolTip($AutoInstallButton, "This will install all the emulators where roms are already present (orange lines).")
 $tooltip.SetToolTip($UninstallButton, "This will uninstall all the selected rows.`nUse the row selector at the left to select one or multiple rows firt.`n(Press control for multiple selection)`nThen click uninstall button.")
+$tooltip.SetToolTip($HelpButton, "This will display the help of Onion Emulator Manager.")
 $tooltip.SetToolTip($dropDown, "Select the type of items here.")
 $tooltip.SetToolTip($textBoxFilter, "This is a filter field for all the elements of the table below.")
+
 
     
 
@@ -475,8 +494,10 @@ $tableLayoutPanel.Controls.Add($dropDown, 0, 0)
 $tableLayoutPanel.Controls.Add($labelRowCount, 1, 0)
 # $tableLayoutPanel.Controls.Add($dataGridViewContainer, 0, 3)
 $tableLayoutPanel.Controls.Add($InstallButton, 2, 0)
-$tableLayoutPanel.Controls.Add($UninstallButton, 2, 2)
 $tableLayoutPanel.Controls.Add($AutoInstallButton, 2, 1)
+# $tableLayoutPanel.Controls.Add($checkBox, 0, 2)
+$tableLayoutPanel.Controls.Add($UninstallButton, 2, 2)
+$tableLayoutPanel.Controls.Add($HelpButton, 0, 2)
 # $form.Controls.Add($InstallButton)
 # $form.Controls.Add($UninstallButton)
 
