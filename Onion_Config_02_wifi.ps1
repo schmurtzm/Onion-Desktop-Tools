@@ -38,6 +38,9 @@ $form.Text = "WiFi Configuration"
 $form.Size = New-Object System.Drawing.Size(400, 200)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedSingle
+$iconPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\res\wifi.ico"
+$icon = New-Object System.Drawing.Icon($iconPath)
+$form.Icon = $icon
 
 # Création de la première TextBox pour le SSID
 $textboxSSID = New-Object System.Windows.Forms.TextBox

@@ -28,7 +28,13 @@ $gb.Width = 390
 $gb.Left = 10
 
 
-
+function ShowNoDriveFoundLabel {
+    $noDriveLabel = New-Object System.Windows.Forms.Label
+    $noDriveLabel.Text = "No drive found.`nCheck that your SD card is inserted in your SD card reader`nand that Onion Desktop Tools is running as administrator."
+    $noDriveLabel.Location = New-Object System.Drawing.Point(20, 20)
+    $noDriveLabel.AutoSize = $true
+    $gb.Controls.Add($noDriveLabel)
+}
 function RefreshDriveList {
     $gb.Controls.Clear()
     $driveRadioButtons.Clear()
@@ -74,6 +80,11 @@ function RefreshDriveList {
                     $button_ok.Enabled = $true
                 })
         }
+    }
+
+    if ($driveRadioButtons.Count -eq 0) {
+        ShowNoDriveFoundLabel
+        $locationY = 50
     }
 
     $gb.Height = $locationY + 20
