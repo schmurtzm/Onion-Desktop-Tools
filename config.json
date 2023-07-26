@@ -2,6 +2,18 @@
   "Onion_Configuration": {
     "System": [
       {
+        "filename": ".noAutoStart",
+        "short_description": "Disable auto resume last game",
+        "description": "When checked, it will never resume the game and always start the default interface at boot.",
+        "sub_option": 0
+      },
+      {
+        "filename": ".disableStandby",
+        "short_description": "Shutdown on power button single press",
+        "description": "When checked, the console is powered off with a single press on power button.\nWhen unchecked, signle press triggers standby mode.",
+        "sub_option": 0
+      },
+      {
         "filename": ".noMenuHaptics",
         "short_description": "Disable Menu button vibration",
         "description": "When checked, the vibration of the Menu button will be disabled.",

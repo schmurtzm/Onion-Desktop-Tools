@@ -80,7 +80,7 @@ if ($driveLetter -ne $null) {
             "(Saves, roms, configuration: everything will be lost!)`n`n" +
             "Note that it's not recommended to install Onion on the `n" +
             "stock SD card (as the quality is not good you could have`n" +
-            "data corruption which may prevent Onion from working properly."
+            "data corruption which may prevent Onion from working properly)."
 
         }
         else {
@@ -118,8 +118,16 @@ Write-Host "Unlocking drive in case of some apps hooks the drive."
 Write-Host "Start formating ..."
 
 
-.\tools\RMPARTUSB-old.exe drive=$Drive_Number WINPE FAT32 NOACT  VOLUME=Onion
+& .\tools\RMPARTUSB-old.exe drive=$Drive_Number WINPE FAT32 NOACT  VOLUME=Onion
 #.\tools\RMPARTUSB-old.exe drive=$Drive_Number WINPE FAT32 NOACT USBFDD VOLUME=Onion
+# Check the exit code
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "An error occurred while executing RMPARTUSB-old.exe."
+    exit 2  # Exit the script with error code 2
+} else {
+    Write-Host "Format command executed successfully."
+    # Continue with other actions as needed.
+}
 
 sleep 5
 $driveLetter = GetLetterFromDriveNumber

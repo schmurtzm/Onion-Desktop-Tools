@@ -100,8 +100,13 @@ $OKButton_Click = {
                 # $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
                 # $wgetProcess.WaitForExit()
                 . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
+                if ($?) {
                 . "$PSScriptRoot\Onion_Install_Download.ps1"
                 . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
+                }
+                else {
+                    Write-Host "Operation canceled or something wrong during formating" 
+                }
             }
             $OKButton.Enabled = 1
         }
@@ -119,8 +124,11 @@ $OKButton_Click = {
                 # $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
                 # $wgetProcess.WaitForExit()
                 . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
+                if ($?) {
                 . "$PSScriptRoot\Onion_Install_Download.ps1"
                 . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
+                . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
+                }
             }
             $OKButton.Enabled = 1
         }

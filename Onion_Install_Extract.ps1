@@ -34,7 +34,7 @@ function Get_SDcardType {
     $driveLetter = $Target.Replace(":", "")
 
 
-    $label_right.Text += "`r`n`r`n`------------------------------ SD CARD ------------------------------`r`n"
+    $label_right.Text += "`r`n`r`n`------------------------ SD CARD information ------------------------`r`n"
 
     $label_right.Text += "`r`nDrive letter : $Target"
 
@@ -134,8 +134,17 @@ function Button_Click {
 
 
     $Update_File = $flowLayoutPanel.Controls | Where-Object { $_.Checked } | Select-Object -ExpandProperty Text
+
+    if (-not $Update_File) {
+        # Check if $Update_File is empty
+        Write-Host "No file selected."
+        return
+    }
+
     Write-Host "Selected file: $Update_File"
     Write-Host "Destination: $Target"
+        
+
 
     $label_right.Text += "`r`n`r`n`------------------- EXTRACTION OF ONION -------------------`r`n"
     $label_right.Text += "`r`nSelected file: `"$Update_File`"`r`nDestination: $Target"
@@ -160,7 +169,7 @@ function Button_Click {
 
         If ($script:SdCardState -eq "empty") {
             $messageBoxText = "You're about to install $Update_File.`n" +
-            "Are you sure that you want install it on ${Target}: ?`n"
+            "Are you sure that you want install it on ${Target} ?`n"
         }
         elseif ($script:SdCardState -eq "Onion") {
             $messageBoxText = "You're about to upgrade Onion OS`n`"$script:SdCard_Version`" to `"$Update_File`".`n`n" +
@@ -190,7 +199,7 @@ function Button_Click {
         }
         else {
             $messageBoxText = "You're about to install `"$Update_File`".`n" +
-            "Are you sure that you want install it on ${Target}: ? $script:SdCardState `n"
+            "Are you sure that you want install it on ${Target} ? $script:SdCardState `n"
 
 
         }
@@ -203,7 +212,7 @@ function Button_Click {
 
         if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
          
-        
+            $button.Enabled = 0
 
             $label_right.Text += "`r`nExtraction in progress..."
  
@@ -211,23 +220,28 @@ function Button_Click {
             $label_right.ScrollToCaret()
 
             $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/c @title extracting $Update_File to $Target & mode con:cols=80 lines=1 & $7zPath x -y -aoa `"downloads\$Update_File`" -o`"$Target\`"" -PassThru
-            while (!$wgetProcess.HasExited) {
-                Start-Sleep -Milliseconds 1000  # Attendre une demi-seconde
-            }
+            $wgetProcess.WaitForExit()
+            $exitCode = $wgetProcess.ExitCode
+            # while (!$wgetProcess.HasExited) {
+            #     Start-Sleep -Milliseconds 1000
+            # }
+            
 
-            if ($LASTEXITCODE -eq 0) {
+            if ($exitCode -eq 0) {
                 Write-Host "Decompression successful."
                 Write-Host "`n`nUpdate $Release_Version applied.`nInsert SD card in your Miyoo and start it to run installation!`n"
-                $label_right.Text += "`r`nExtraction successful !`nYou can now close this Windows.`nInsert this SD card in your Miyoo to start Installation."
+                $label_right.Text += "`r`nExtraction successful !`r`nYou can now close this Windows.`r`nInsert this SD card in your Miyoo to start Installation."
             }
             else {
                 Write-Host "`n`nError: Something went wrong during decompression.`nTry to run OTA update again or make a manual update.`nInstallation stopped."
-                $label_right.Text += "`r`nError: Something went wrong during decompression.`nTry to run OTA update again or make a manual update.`r`nInstallation stopped."
+                $label_right.Text += "`r`nError: Something went wrong during decompression.`r`nTry to run OTA update again or make a manual update.`r`nInstallation stopped."
             }
             # else {
             #     Write-Host "Insufficient space on $Target drive to extract file."
             #     $label_right.Text += "`r`nInsufficient space on $Target drive to extract file."
             # }
+
+            $button.Enabled = 1
 
         }
         else {

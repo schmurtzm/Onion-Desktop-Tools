@@ -51,6 +51,8 @@ function Populate-Version {
         if ($Downloaded_size -eq $Beta_asset.size) {
             Write-Host "Beta file size already OK ! ($Downloaded_size Bytes)"
             $BetaRadioButton.Enabled = 0 
+            $BetaRadioButton.Text = $BetaRadioButton.Text + " (already downloaded)"
+
         }
         else {
             Write-Host "`n`nExisting beta file has wrong size:`n` $Downloaded_size instead of $size`nDownloading...`n"
@@ -130,8 +132,8 @@ function Download-Button_Click {
     $Update_FileName = $url.Split("/")[-1]
     $Update_FullPath = Get-Item -Path "downloads\$Update_FileName"
 
-    Write-Host "zzzz url $url" 
-    Write-Host "zzzz Update_FullPath $Update_FullPath" 
+    Write-Host "url $url" 
+    Write-Host "Update_FullPath $Update_FullPath" 
 
     if (Test-Path downloads\$Update_FileName) {
         $Downloaded_size = Get-Item -Path downloads\$Update_FileName | Select-Object -ExpandProperty Length
@@ -193,6 +195,7 @@ function Download-Button_Click {
         Write-Host "File size OK! ($Downloaded_size)"
         $DL_Lbl.Text = "Download successful."
         #Start-Sleep -Seconds 3
+        $timer.Start()
     }
     else {
         Write-Host "`n`nError: Wrong download size:`n` $Downloaded_size instead of $size`n"
@@ -286,6 +289,7 @@ $timer.Add_Tick({
 $script:counter = 6
 # Populate version information
 Populate-Version
+$DL_Lbl.Text = "Close this Window if you don't want to download any new version."
 
 # Show the form
 $iconPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\res\onion.ico"

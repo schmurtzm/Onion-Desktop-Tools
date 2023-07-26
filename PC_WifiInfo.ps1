@@ -24,6 +24,9 @@ function Get-WifiPassword {
         $form.Text = "Profils WiFi"
         $form.Size = New-Object System.Drawing.Size(600, 400)
         $form.StartPosition = "CenterScreen"
+        $iconPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\res\wifi.ico"
+        $icon = New-Object System.Drawing.Icon($iconPath)
+        $form.Icon = $icon
         
         $tableLayoutPanel = New-Object System.Windows.Forms.TableLayoutPanel
         $tableLayoutPanel.Dock = 'Fill'
@@ -54,11 +57,11 @@ function Get-WifiPassword {
                         }
                         $button.Width = 250
                         $button.Add_Click({ 
-                            $clickedButton = $this
-                            $form.Tag = $clickedButton.Tag
-                            $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
-                            $form.Close()
-                        })
+                                $clickedButton = $this
+                                $form.Tag = $clickedButton.Tag
+                                $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
+                                $form.Close()
+                            })
                         
                         $tableLayoutPanel.Controls.Add($button)
                     }
