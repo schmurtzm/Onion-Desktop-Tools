@@ -9,7 +9,8 @@ $releaseInfo = Invoke-RestMethod -Uri $apiUrl
 # Get the version number from the tag_name in the API response
 if ($releaseInfo -and $releaseInfo.tag_name) {
     $latestVersion = $releaseInfo.tag_name
-} else {
+}
+else {
     Write-Host "Failed to retrieve the latest version from GitHub API. No action required."
     return
 }
@@ -19,7 +20,8 @@ $menuFilePath = "Menu.ps1"
 $menuContent = Get-Content -Path $menuFilePath
 if ($menuContent -and $menuContent[0]) {
     $currentVersion = $menuContent[0] -replace "# Onion-Desktop-Tools-"
-} else {
+}
+else {
     Write-Host "Failed to retrieve the current version from Menu.ps1 file. No action required."
     return
 }
@@ -71,17 +73,30 @@ if ($latestVersion -gt $currentVersion) {
 
         # Download the ZIP file
         $zipUrl = $releaseInfo.zipball_url
-        $zipFilePath = "Onion-Desktop-Tools.zip"
+        $zipFilePath = "downloads\ODT_updates\Onion-Desktop-Tools.zip"
         Invoke-WebRequest -Uri $zipUrl -OutFile $zipFilePath
 
         # Extract the contents of the ZIP file using 7-Zip
-        $extractDir = "Onion-Desktop-Tools"
+        $extractDir = "downloads\ODT_updates\tempUpdateFolder"
         & "7z.exe" x -y $zipFilePath "-o$extractDir"
 
+        #  Find the subfolder with a GUID inside the extracted contents
+        $guidSubfolder = Get-ChildItem -Path $extractDir | Where-Object { $_.PSIsContainer -and $_.Name -match 'schmurtzm-Onion-Desktop-Tools-.+' }
+
+        #  Move the files from the GUID subfolder to the current folder
+        Move-Item -Path "$($guidSubfolder.FullName)\*" -Destination . -Force
+
+        #  Clean up the temporary extraction folder
+        Remove-Item -Path $extractDir -Recurse -Force
+
         Write-Host "Download and extraction completed."
-    } else {
+    }
+    else {
         Write-Host "Operation canceled. No download performed."
     }
-} else {
+}
+else {
     Write-Host "The version $latestVersion is the same or lower than $currentVersion. No action required."
 }
+
+. "$PSScriptRoot\Menu.ps1"

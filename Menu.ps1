@@ -1,4 +1,4 @@
-# Onion-Desktop-Tools-v0.0.2
+# Onion-Desktop-Tools-v0.0.3
 param (
     [Parameter(Mandatory = $false)]
     [string]$HighDPI
@@ -10,6 +10,7 @@ Set-Location -Path $ScriptDirectory
 
 Add-Type -AssemblyName System.Windows.Forms
 
+#$HighDPI = 1
 if ($HighDPI -eq 1) {
     # Scaling
     ##################################################
@@ -33,7 +34,7 @@ if ($HighDPI -eq 1) {
 # Create main window
 $Form = New-Object System.Windows.Forms.Form
 $Form.Text = "Onion Desktop Tools"
-$Form.Size = New-Object System.Drawing.Size(500, 320)
+$Form.Size = New-Object System.Drawing.Size(505, 320)
 $form.StartPosition = "CenterScreen"
 $iconPath = Join-Path -Path $PSScriptRoot -ChildPath "tools\res\onion.ico"
 $icon = New-Object System.Drawing.Icon($iconPath)
@@ -45,6 +46,18 @@ $Form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 # Create TabControl control
 $TabControl = New-Object System.Windows.Forms.TabControl
 $TabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+# Add the TabControl event handler
+
+# Event handler for TabControl SelectedIndexChanged event
+$TabControl_SelectedIndexChanged = {
+    if ($TabControl.SelectedTab -eq $AboutTab) {
+        $OKButton.Visible = $false
+    } else {
+        $OKButton.Visible = $true
+    }
+}
+$TabControl.add_SelectedIndexChanged($TabControl_SelectedIndexChanged)
+
 
 # Function to get the selected option from the current tab
 function GetSelectedOption {
@@ -92,7 +105,7 @@ $OKButton_Click = {
         }
         
         if ($selectedOption.text -eq $InstallUpdateRadioButton1.Text) {
-            # "Format SD card and install Onion"
+            # "Format SD card or install Onion"
             $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select target drive for Onion"
             if ($CurrentDrive -ne $null) {
@@ -101,8 +114,8 @@ $OKButton_Click = {
                 # $wgetProcess.WaitForExit()
                 . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
                 if ($?) {
-                . "$PSScriptRoot\Onion_Install_Download.ps1"
-                . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
+                    . "$PSScriptRoot\Onion_Install_Download.ps1"
+                    . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
                 }
                 else {
                     Write-Host "Operation canceled or something wrong during formating" 
@@ -112,7 +125,7 @@ $OKButton_Click = {
         }
 
         if ($selectedOption.text -eq $InstallUpdateRadioButton2.Text) {
-            # "Format SD card and install Onion"
+            # "Format SD card or install Onion"
             $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select stock SD card"
             if ($CurrentDrive -ne $null) {
@@ -125,9 +138,9 @@ $OKButton_Click = {
                 # $wgetProcess.WaitForExit()
                 . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
                 if ($?) {
-                . "$PSScriptRoot\Onion_Install_Download.ps1"
-                . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
-                . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
+                    . "$PSScriptRoot\Onion_Install_Download.ps1"
+                    . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
+                    . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
                 }
             }
             $OKButton.Enabled = 1
@@ -191,9 +204,9 @@ function Get_Drive($Title) {
     }
 }
 
-# Tab "Install and Update Onion"
+# Tab "Install or Update Onion"
 $InstallUpdateTab = New-Object System.Windows.Forms.TabPage
-$InstallUpdateTab.Text = "Install and Update Onion"
+$InstallUpdateTab.Text = "Install or Update Onion"
 $TabControl.TabPages.Add($InstallUpdateTab)
 
 # Create GroupBox control for the "Install and Update Onion" tab
@@ -247,6 +260,7 @@ $radioButtonTop = 30
 $radioButtonMargin = 10
 
 # Create radio buttons for each Onion configuration file
+Write-Host "Adding Onion configuration scripts : "
 foreach ($configFile in $onionConfigFiles) {
     # Read the first line as a comment to get the radio button name
     $radioButtonText = Get-Content -Path $configFile.FullName | Where-Object { $_ -match "^#" } | Select-Object -First 1 | ForEach-Object { $_ -replace "#", "" }
@@ -263,7 +277,6 @@ foreach ($configFile in $onionConfigFiles) {
     #     $clickedRadioButton = $this
     #     & $clickedRadioButton.Tag
     # })
-
     Write-Host "$configFile.FullName"
 
     $OnionConfigGroupBox.Controls.Add($radioButton)
@@ -282,12 +295,12 @@ foreach ($configFile in $onionConfigFiles) {
 # $InstallUpdateGroupBox.Controls.Add($InstallUpdateRadioButton3)
 # $tooltip.SetToolTip($InstallUpdateRadioButton3, "This will move your current SD card files in`na sub directory and install a new Onion on your SD Card.`nThis option is useful for testing and allows an`neasy roll back if needed.")
 
-# Tab "Backup and Restore Onion"
+# Tab "Backup or Restore Onion"
 $BackupRestoreTab = New-Object System.Windows.Forms.TabPage
-$BackupRestoreTab.Text = "Backup and Restore Onion"
+$BackupRestoreTab.Text = "Backup or Restore Onion"
 $TabControl.TabPages.Add($BackupRestoreTab)
 
-# Create GroupBox control for the "Backup and Restore Onion" tab
+# Create GroupBox control for the "Backup or Restore Onion" tab
 $BackupRestoreGroupBox = New-Object System.Windows.Forms.GroupBox
 $BackupRestoreGroupBox.Location = New-Object System.Drawing.Point(20, 20)
 $BackupRestoreGroupBox.Size = New-Object System.Drawing.Size(440, 200)
@@ -335,6 +348,89 @@ $OtherToolsRadioButton3.Location = New-Object System.Drawing.Point(20, 60)
 $OtherToolsRadioButton3.Size = New-Object System.Drawing.Size(250, 20)
 $OtherToolsRadioButton3.Text = "Check for errors (scandisk)"
 $OtherToolsGroupBox.Controls.Add($OtherToolsRadioButton3)
+
+
+# Tab "About"
+$AboutTab = New-Object System.Windows.Forms.TabPage
+$AboutTab.Text = "About"
+$TabControl.TabPages.Add($AboutTab)
+
+# Create Label control for the "About" tab
+$AboutLabel = New-Object System.Windows.Forms.Label
+$AboutLabel.Text = "Onion Desktop Tools`nBy Schmurtz (Onion Team)`n-----------------------`nSchmurtz Sponsors :"    #`n`n`n-----------------------`nOnion Team Sponsors :
+$AboutLabel.Location = New-Object System.Drawing.Point(20, 20)
+$AboutLabel.Size = New-Object System.Drawing.Size(200, 70)
+$AboutTab.Controls.Add($AboutLabel)
+
+# Create PictureBox control for the Patreon logo
+$PatreonLogo = New-Object System.Windows.Forms.PictureBox
+$PatreonLogo.ImageLocation = "tools\res\patreon.jpg" # Replace with the actual image path
+$PatreonLogo.Location = New-Object System.Drawing.Point(20, 80)
+$PatreonLogo.Size = New-Object System.Drawing.Size(100, 50)
+$PatreonLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
+$PatreonLogo.Cursor = [System.Windows.Forms.Cursors]::Hand
+$PatreonLogo.Add_Click({
+    Start-Process "https://www.patreon.com/schmurtz"
+})
+$AboutTab.Controls.Add($PatreonLogo)
+
+$coffeeLogo = New-Object System.Windows.Forms.PictureBox
+$coffeeLogo.ImageLocation = "tools\res\buymeacoffee.jpg" # Replace with the actual image path
+$coffeeLogo.Location = New-Object System.Drawing.Point(130, 80)
+$coffeeLogo.Size = New-Object System.Drawing.Size(100, 50)
+$coffeeLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
+$coffeeLogo.Cursor = [System.Windows.Forms.Cursors]::Hand
+$coffeeLogo.Add_Click({
+    Start-Process "https://www.buymeacoffee.com/schmurtz"
+})
+
+$AboutTab.Controls.Add($coffeeLogo)
+
+
+# Create Label control for the "About" tab
+$AboutLabel = New-Object System.Windows.Forms.Label
+$AboutLabel.Text = "-----------------------`nOnion Team Sponsors :"
+$AboutLabel.Location = New-Object System.Drawing.Point(20, 135)
+$AboutLabel.Size = New-Object System.Drawing.Size(200, 35)
+$AboutTab.Controls.Add($AboutLabel)
+
+
+# Create PictureBox control for the Patreon logo
+$githubLogo = New-Object System.Windows.Forms.PictureBox
+$githubLogo.ImageLocation = "tools\res\github.jpg" # Replace with the actual image path
+$githubLogo.Location = New-Object System.Drawing.Point(20, 160)
+$githubLogo.Size = New-Object System.Drawing.Size(100, 50)
+$githubLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
+$githubLogo.Cursor = [System.Windows.Forms.Cursors]::Hand
+$githubLogo.Add_Click({
+    Start-Process "https://github.com/sponsors/Aemiii91"
+})
+$AboutTab.Controls.Add($githubLogo)
+
+$kofiLogo = New-Object System.Windows.Forms.PictureBox
+$kofiLogo.ImageLocation = "tools\res\kofi.jpg" # Replace with the actual image path
+$kofiLogo.Location = New-Object System.Drawing.Point(130, 160)
+$kofiLogo.Size = New-Object System.Drawing.Size(100, 50)
+$kofiLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
+$kofiLogo.Cursor = [System.Windows.Forms.Cursors]::Hand
+$kofiLogo.Add_Click({
+    Start-Process "https://ko-fi.com/Aemiii91"
+})
+
+$AboutTab.Controls.Add($kofiLogo)
+
+# Create HyperlinkLabel control for the Onion Documentation link
+$OnionDocLink = New-Object System.Windows.Forms.LinkLabel
+$OnionDocLink.Text = "Onion Documentation"
+$OnionDocLink.Location = New-Object System.Drawing.Point(20, 220)
+$OnionDocLink.Size = New-Object System.Drawing.Size(200, 20)
+$OnionDocLink.LinkBehavior = [System.Windows.Forms.LinkBehavior]::HoverUnderline
+$OnionDocLink.Cursor = [System.Windows.Forms.Cursors]::Hand
+$OnionDocLink.Add_Click({
+    Start-Process "https://github.com/OnionUI/Onion/wiki"
+})
+$AboutTab.Controls.Add($OnionDocLink)
+
 
 # Create "OK" button
 $OKButton = New-Object System.Windows.Forms.Button
