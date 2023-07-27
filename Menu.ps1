@@ -1,4 +1,5 @@
 # Onion-Desktop-Tools-v0.0.3
+
 param (
     [Parameter(Mandatory = $false)]
     [string]$HighDPI
@@ -7,6 +8,17 @@ $selectedTag = ""
 $ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
+
+# Read the Menu.ps1 file and get the version number from the first line
+$menuContent = Get-Content -Path $MyInvocation.MyCommand.Path
+if ($menuContent -and $menuContent[0]) {
+    $currentVersion = $menuContent[0] -replace "# Onion-Desktop-Tools-"
+    Write-Host "ODT version : $currentVersion"
+}
+else {
+    Write-Host "Failed to retrieve the current version from Menu.ps1 file."
+    return
+}
 
 Add-Type -AssemblyName System.Windows.Forms
 
@@ -357,7 +369,7 @@ $TabControl.TabPages.Add($AboutTab)
 
 # Create Label control for the "About" tab
 $AboutLabel = New-Object System.Windows.Forms.Label
-$AboutLabel.Text = "Onion Desktop Tools`nBy Schmurtz (Onion Team)`n-----------------------`nSchmurtz Sponsors :"    #`n`n`n-----------------------`nOnion Team Sponsors :
+$AboutLabel.Text = "Onion Desktop Tools $currentVersion`nBy Schmurtz (Onion Team)`n-----------------------`nSchmurtz Sponsors :"    #`n`n`n-----------------------`nOnion Team Sponsors :
 $AboutLabel.Location = New-Object System.Drawing.Point(20, 20)
 $AboutLabel.Size = New-Object System.Drawing.Size(200, 70)
 $AboutTab.Controls.Add($AboutLabel)
