@@ -231,10 +231,16 @@ function Button_Click {
                 Write-Host "Decompression successful."
                 Write-Host "`n`nUpdate $Release_Version applied.`nInsert SD card in your Miyoo and start it to run installation!`n"
                 $label_right.Text += "`r`nExtraction successful !`r`nYou can now close this Windows.`r`nInsert this SD card in your Miyoo to start Installation."
+                $soundPlayer = New-Object System.Media.SoundPlayer
+                $soundPlayer.SoundLocation = "tools\res\success.wav"
+                $soundPlayer.Play()
             }
             else {
                 Write-Host "`n`nError: Something went wrong during decompression.`nTry to run OTA update again or make a manual update.`nInstallation stopped."
                 $label_right.Text += "`r`nError: Something went wrong during decompression.`r`nTry to run OTA update again or make a manual update.`r`nInstallation stopped."
+                $soundPlayer = New-Object System.Media.SoundPlayer
+                $soundPlayer.SoundLocation = "tools\res\fail.wav"
+                $soundPlayer.Play()
             }
             # else {
             #     Write-Host "Insufficient space on $Target drive to extract file."
