@@ -78,7 +78,10 @@ if ($latestVersion -gt $currentVersion) {
 
         # Extract the contents of the ZIP file using 7-Zip
         $extractDir = "downloads\ODT_updates\tempUpdateFolder"
-        & "7z.exe" x -y $zipFilePath "-o$extractDir"
+
+        $7zPath = "tools\7z.exe"
+        $output = & $7zPath x -y $zipFilePath "-o$extractDir"
+
 
         #  Find the subfolder with a GUID inside the extracted contents
         $guidSubfolder = Get-ChildItem -Path $extractDir | Where-Object { $_.PSIsContainer -and $_.Name -match 'schmurtzm-Onion-Desktop-Tools-.+' }

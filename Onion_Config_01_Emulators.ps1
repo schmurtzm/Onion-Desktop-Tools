@@ -1,4 +1,4 @@
-# Onion Emulators and apps Manager
+# Onion Emulators and Apps Manager
 
 param (
     [Parameter(Mandatory = $false)]

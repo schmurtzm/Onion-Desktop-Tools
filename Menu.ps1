@@ -64,7 +64,8 @@ $TabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 $TabControl_SelectedIndexChanged = {
     if ($TabControl.SelectedTab -eq $AboutTab) {
         $OKButton.Visible = $false
-    } else {
+    }
+    else {
         $OKButton.Visible = $true
     }
 }
@@ -137,22 +138,23 @@ $OKButton_Click = {
         }
 
         if ($selectedOption.text -eq $InstallUpdateRadioButton2.Text) {
-            # "Format SD card or install Onion"
+            # "Migrate stock SD card to a new SD card with Onion"
             $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select stock SD card"
             if ($CurrentDrive -ne $null) {
                 . "$PSScriptRoot\Onion_Save_Backup.ps1" -Drive_Number $CurrentDrive[0]
-            }
-            $CurrentDrive = Get_Drive "Select target drive for Onion"
-            if ($CurrentDrive -ne $null) {
-                # Sometimes a scandisk is required to format 
-                # $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
-                # $wgetProcess.WaitForExit()
-                . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
-                if ($?) {
-                    . "$PSScriptRoot\Onion_Install_Download.ps1"
-                    . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
-                    . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
+            
+                $CurrentDrive = Get_Drive "Select target drive for Onion"
+                if ($CurrentDrive -ne $null) {
+                    # Sometimes a scandisk is required to format 
+                    # $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
+                    # $wgetProcess.WaitForExit()
+                    . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
+                    if ($?) {
+                        . "$PSScriptRoot\Onion_Install_Download.ps1"
+                        . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
+                        . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
+                    }
                 }
             }
             $OKButton.Enabled = 1
@@ -382,8 +384,8 @@ $PatreonLogo.Size = New-Object System.Drawing.Size(100, 50)
 $PatreonLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
 $PatreonLogo.Cursor = [System.Windows.Forms.Cursors]::Hand
 $PatreonLogo.Add_Click({
-    Start-Process "https://www.patreon.com/schmurtz"
-})
+        Start-Process "https://www.patreon.com/schmurtz"
+    })
 $AboutTab.Controls.Add($PatreonLogo)
 
 $coffeeLogo = New-Object System.Windows.Forms.PictureBox
@@ -393,8 +395,8 @@ $coffeeLogo.Size = New-Object System.Drawing.Size(100, 50)
 $coffeeLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
 $coffeeLogo.Cursor = [System.Windows.Forms.Cursors]::Hand
 $coffeeLogo.Add_Click({
-    Start-Process "https://www.buymeacoffee.com/schmurtz"
-})
+        Start-Process "https://www.buymeacoffee.com/schmurtz"
+    })
 
 $AboutTab.Controls.Add($coffeeLogo)
 
@@ -415,8 +417,8 @@ $githubLogo.Size = New-Object System.Drawing.Size(100, 50)
 $githubLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
 $githubLogo.Cursor = [System.Windows.Forms.Cursors]::Hand
 $githubLogo.Add_Click({
-    Start-Process "https://github.com/sponsors/Aemiii91"
-})
+        Start-Process "https://github.com/sponsors/Aemiii91"
+    })
 $AboutTab.Controls.Add($githubLogo)
 
 $kofiLogo = New-Object System.Windows.Forms.PictureBox
@@ -426,8 +428,8 @@ $kofiLogo.Size = New-Object System.Drawing.Size(100, 50)
 $kofiLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
 $kofiLogo.Cursor = [System.Windows.Forms.Cursors]::Hand
 $kofiLogo.Add_Click({
-    Start-Process "https://ko-fi.com/Aemiii91"
-})
+        Start-Process "https://ko-fi.com/Aemiii91"
+    })
 
 $AboutTab.Controls.Add($kofiLogo)
 
@@ -439,8 +441,8 @@ $OnionDocLink.Size = New-Object System.Drawing.Size(200, 20)
 $OnionDocLink.LinkBehavior = [System.Windows.Forms.LinkBehavior]::HoverUnderline
 $OnionDocLink.Cursor = [System.Windows.Forms.Cursors]::Hand
 $OnionDocLink.Add_Click({
-    Start-Process "https://github.com/OnionUI/Onion/wiki"
-})
+        Start-Process "https://github.com/OnionUI/Onion/wiki"
+    })
 $AboutTab.Controls.Add($OnionDocLink)
 
 

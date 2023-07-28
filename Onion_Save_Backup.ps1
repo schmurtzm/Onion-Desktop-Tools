@@ -1,4 +1,4 @@
-$ScriptPath = $MyInvocation.MyCommand.Path
+﻿$ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
 
@@ -235,6 +235,8 @@ function Perform-Backup {
     $form_desc = New-Object System.Windows.Forms.Form
     $form_desc.Text = "Backup Description Form"
     $form_desc.Size = New-Object System.Drawing.Size(420, 230)
+    $form_desc.StartPosition = "CenterScreen"
+    $form_desc.Icon = $icon
 
     # Cr�ation de l'�tiquette
     $label = New-Object System.Windows.Forms.Label
@@ -362,7 +364,10 @@ function Perform-Backup {
                 $BIOSSource = Join-Path -Path ${Drive_Letter}:\ -ChildPath 'RetroArch\.retroarch\system'
                 $BiosDestination = Join-Path -Path $BackupFolder -ChildPath 'BIOS'
             }
-            Robocopy "$BIOSSource" "$BiosDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES | Get-RobocopyProgress -Source $BIOSSource -Title "Backuping BIOS..."
+            Start-Process -FilePath cmd.exe -ArgumentList "/c Robocopy "$BIOSSource" "$BiosDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES /XD "cheats" "cheats备用版"  "GLupeN64" "Mupen64plus" "system\scummvm" "pscnbios" /XF "scph39*"  | Get-RobocopyProgress -Source $BIOSSource -Title "Backuping BIOS..."
+            Write-Host  "$BIOSSource" "$BiosDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES /XD "cheats" "CHEATS~1" "GLupeN64" "Mupen64plus" "system\scummvm" "pscnbios" /XF "fbneo\*.ini" "scph39*" 
+            # extract FB neo one file pack (cheats.dat from https://github.com/finalburnneo/FBNeo-cheats) instead of 8000 files of ini cheats initially included in stock
+            $output = & "tools\7z.exe" x -y "tools\cheat.7z" "-o$BiosDestination\fbneo\cheats"
             $label.Text = ""
         }
 
