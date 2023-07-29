@@ -128,6 +128,7 @@ function Get_SDcardType {
 
 
 function DisplayBackupInfo($backupName) {
+    $button_Restore.Enabled = 1
     $label_right.Text = ""
     
     $BackupFolder = $flowLayoutPanel.Controls | Where-Object { $_.Checked } | Select-Object -ExpandProperty Text
@@ -139,7 +140,7 @@ function DisplayBackupInfo($backupName) {
         if ($backupInfoFile.Name -like "Backupinfo_*") {
             $backupInfo = Get-Content -Path $backupInfoFile.FullName -Raw
             $label_right.Text = $script:SDcard_description
-            $label_right.Text +=  "`r`n`r`n`---------------------------- BACKUP INFO ----------------------------`r`n`r`n"
+            $label_right.Text += "`r`n`r`n`---------------------------- BACKUP INFO ----------------------------`r`n`r`n"
 
             $label_right.Text += $backupInfo
             # we get what is backuped
@@ -165,99 +166,97 @@ function DisplayBackupInfo($backupName) {
 
 
 
-Function Get-RobocopyProgress {
-
-    param(
-        [Parameter(Mandatory, ValueFromPipeline)]
-        $InputObject,
+function RoboCopy-WithProgress {
+    # Credits  : https://stackoverflow.com/a/21209726
+    [CmdletBinding()]
+    param (
         [Parameter(Mandatory = $true)]
-        [string]$Source,
-        [Parameter(Mandatory = $true)]
-        [string]$Title, # will be in the textbox
-        [Parameter(Mandatory = $false)]
-        [string]$Exclusion, # Exclude filter (only files which not match will be in the total files count)
-        [Parameter(Mandatory = $false)]
-        [string]$Inclusion              # Include filter (only files which match will be in the total files count)
+        [string] $Source
+        , [Parameter(Mandatory = $true)]
+        [string] $Destination
+        , [Parameter(Mandatory = $false)]
+        [string] $AdditionalParameters
+        , [int] $Gap = 200
+        , [int] $ReportGap = 2000
     )
+    # Define regular expression that will gather number of bytes copied
+    $RegexBytes = '(?<=\s+)\d+(?=\s+)';
 
-    begin {
-        [string]$file = " "
-        [double]$percent = 0
-        [double]$size = $Null
-        if ($PSBoundParameters.ContainsKey('Exclusion')) { 
-            [double]$count = (gci $source -file -fo -re | ? { $_.FullName -inotmatch "$Exclusion" }).Count
-            Write-Host "exclude $Exclusion -> $count files to copy"
-        }
-        elseif ($PSBoundParameters.ContainsKey('Inclusion')) { 
-            [double]$count = (gci $source -file -fo -re | ? { $_.FullName -imatch "$Inclusion" }).Count
-            Write-Host "inclde $Inclusion -> $count files to copy"
-        }
-        else {
-            [double]$count = (gci $source -file -fo -re).Count
-            Write-Host "$count to copy"
-        }
-        [double]$filesLeft = $count
-        [double]$number = 0
-        $progressBar.Maximum = $count
+    #region Robocopy params
+    # E = Copies subdirectories. This option automatically includes empty directories.
+    # NP  = Don't show progress percentage in log
+    # NC  = Don't log file classes (existing, new file, etc.)
+    # BYTES = Show file sizes in bytes
+    # NJH = Do not display robocopy job header (JH)
+    # NJS = Do not display robocopy job summary (JS)
+    # TEE = Display log in stdout AND in target log file
+    $CommonRobocopyParams = '/E /NP /NDL /NC /BYTES /NJH /NJS';
+    #endregion Robocopy params
 
+    #region Robocopy Staging
+    Write-Verbose -Message 'Analyzing robocopy job ...';
+    $StagingLogPath = '{0}\temp\{1} robocopy staging.log' -f $env:windir, (Get-Date -Format 'yyyy-MM-dd HH-mm-ss');
+
+    $StagingArgumentList = '"{0}" "{1}" /LOG:"{2}" /L {3}' -f $Source, $Destination, $StagingLogPath, $CommonRobocopyParams;
+    Write-Verbose -Message ('Staging arguments: {0}' -f $StagingArgumentList);
+    Start-Process -Wait -FilePath robocopy.exe -ArgumentList $StagingArgumentList -NoNewWindow;
+    # Get the total number of files that will be copied
+    $StagingContent = Get-Content -Path $StagingLogPath;
+    $TotalFileCount = $StagingContent.Count - 1;
+
+    # Get the total number of bytes to be copied
+    [RegEx]::Matches(($StagingContent -join "`n"), $RegexBytes) | % { $BytesTotal = 0; } { $BytesTotal += $_.Value; };
+    Write-Verbose -Message ('Total bytes to be copied: {0}' -f $BytesTotal);
+    #endregion Robocopy Staging
+
+    #region Start Robocopy
+    # Begin the robocopy process
+    $RobocopyLogPath = '{0}\temp\{1} robocopy.log' -f $env:windir, (Get-Date -Format 'yyyy-MM-dd HH-mm-ss');
+    $ArgumentList = '"{0}" "{1}" /LOG:"{2}" /ipg:{3} {4} {5}' -f $Source, $Destination, $RobocopyLogPath, $Gap, $CommonRobocopyParams , $AdditionalParameters;
+    Write-Verbose -Message ('Beginning the robocopy process with arguments: {0}' -f $ArgumentList);
+    $Robocopy = Start-Process -FilePath robocopy.exe -ArgumentList $ArgumentList -Verbose -PassThru -NoNewWindow;
+    Remove-Variable -Name AdditionalParameters 
+    Start-Sleep -Milliseconds 100;
+    #endregion Start Robocopy
+
+    #region Progress bar loop
+    while (!$Robocopy.HasExited) {
+        [System.Windows.Forms.Application]::DoEvents()
+        Start-Sleep -Milliseconds $ReportGap;
+        $BytesCopied = 0;
+        $LogContent = Get-Content -Path $RobocopyLogPath;
+        $BytesCopied = [Regex]::Matches($LogContent, $RegexBytes) | ForEach-Object -Process { $BytesCopied += $_.Value; } -End { $BytesCopied; };
+        $CopiedFileCount = $LogContent.Count - 1;
+        Write-Verbose -Message ('Bytes copied: {0}' -f $BytesCopied);
+        Write-Verbose -Message ('Files copied: {0}' -f $LogContent.Count);
+        $Percentage = 0;
+        if ($BytesCopied -gt 0) {
+            $Percentage = (($BytesCopied / $BytesTotal) * 100)
+        }
+        Write-Progress -Activity Robocopy -Status ("Copied {0} of {1} files; Copied {2} of {3} bytes" -f $CopiedFileCount, $TotalFileCount, $BytesCopied, $BytesTotal) -PercentComplete $Percentage
+        $ProgressBar.Value = $Percentage
+        [System.Windows.Forms.Application]::DoEvents()
     }
+    #endregion Progress loop
+    $label.Text = ""
 
-    process {
-
-        #$Host.PrivateData.ProgressBackgroundColor = 'Cyan' 
-        #$Host.PrivateData.ProgressForegroundColor = 'Black'
-        (gci $source -file -fo -re).Count
-        $data = $InputObject -split '\x09'
-
-        If (![String]::IsNullOrEmpty("$($data[4])")) {
-            $file = $data[4] -replace '.+\\(?=(?:.(?!\\))+$)'
-            $filesLeft--
-            $number++
-        }
-        If (![String]::IsNullOrEmpty("$($data[0])")) {
-            $percent = ($data[0] -replace '%') -replace '\s'
-        }
-        If (![String]::IsNullOrEmpty("$($data[3])")) {
-            $size = $data[3]
-        }
-        [String]$sizeString = switch ($size) {
-            { $_ -gt 1TB -and $_ -lt 1024TB } {
-                "$("{0:n2}" -f ($size / 1TB) + " TB")"
-            }
-            { $_ -gt 1GB -and $_ -lt 1024GB } {
-                "$("{0:n2}" -f ($size / 1GB) + " GB")"
-            }
-            { $_ -gt 1MB -and $_ -lt 1024MB } {
-                "$("{0:n2}" -f ($size / 1MB) + " MB")"
-            }
-            { $_ -ge 1KB -and $_ -lt 1024KB } {
-                "$("{0:n2}" -f ($size / 1KB) + " KB")"
-            }
-            { $_ -lt 1KB } {
-                "$size B"
-            }
-        }
-
-        Write-Progress -Activity "   Currently Copying: ..\$file"`
-            -CurrentOperation  "Copying: $(($number).ToString()) of $(($count).ToString())     Copied: $(if($number -le 0){($number).ToString()}else{($number - 1).ToString()}) / $(($count).ToString())     Files Left: $(($filesLeft + 1).ToString())"`
-            -Status "Size: $sizeString       Complete: $percent%"`
-            -PercentComplete $percent
-
-        $progressBar.Value = $number
-        $label.Text = "$Title $number / $count..."
-        $form.Refresh()
-    }
-    #   END
-    #   {
-    #       $label.Text = ""
-    #   }
+    #region Function output
+    [PSCustomObject]@{
+        BytesCopied = $BytesCopied;
+        FilesCopied = $CopiedFileCount;
+    };
+    #endregion Function output
 }
+
 
 
 
 
 function Perform_Restore {
     $BackupFolder = $flowLayoutPanel.Controls | Where-Object { $_.Checked } | Select-Object -ExpandProperty Text
+    
+    $label_right.Text += "`r`n`r`n`------------------- BACKUP RESTORATION -------------------`r`n"
+
     $RomsSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'Roms'
     $RomsDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'Roms'
 
@@ -265,52 +264,62 @@ function Perform_Restore {
     # V�rification des cases coch�es
     if ($checkBox_Roms.Checked) {
         #Copy-Files -Source $RomsSource -Destination $RomsDestination
-        Robocopy "$RomsSource" "$RomsDestination" /R:3 /W:1 /E /NJH /IS /NJS /NDL /NC /BYTES /XD "Imgs" | Get-RobocopyProgress -Source $RomsSource -Title "Restoring Roms..." -Exclusion "Imgs"
+        # Robocopy "$RomsSource" "$RomsDestination" /R:3 /W:1 /E /NJH /IS /NJS /NDL /NC /BYTES /XD "Imgs" | Get-RobocopyProgress -Source $RomsSource -Title "Restoring Roms..." -Exclusion "Imgs"
         $label.Text = ""
+        $label_right.Text += "`r`nRestoring Roms..."
+
+        RoboCopy-WithProgress -Source $RomsSource -Destination $RomsDestination -Verbose
     }
 
     if ($checkBox_Imgs.Checked) {
-        $RomsSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'Roms'
-        $RomsDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'Roms'
-        Robocopy "$RomsSource" "$RomsDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES *.png | Get-RobocopyProgress -Source $RomsSource -Title "Restoring images..." -Inclusion "Imgs"
-        $label.Text = ""
+        $ImgsSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'Roms'
+        $ImgsDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'Roms'
+        # Robocopy "$ImgsSource" "$ImgsDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES *.png | Get-RobocopyProgress -Source $RomsSource -Title "Restoring images..." -Inclusion "Imgs"
+        $label_right.Text += "`r`nRestoring images..."
+        RoboCopy-WithProgress -Source $ImgsSource -Destination $ImgsDestination -Verbose
         #Copy-Files -Source $RomsSource -Destination $RomsDestination
     }
 
     if ($checkBox_Saves.Checked) {
-        if (Test-Path "$Drive_Letter\.tmp_update\onionVersion\version.txt") {
-            $SavesSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'Saves'
-            $SavesDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'Saves'
-        }
-        Robocopy "$SavesSource" "$SavesDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES | Get-RobocopyProgress -Source $SavesSource -Title "Restoring Saves..."
-        $label.Text = ""
+        $SavesSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'Saves'
+        $SavesDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'Saves'
+        # Robocopy "$SavesSource" "$SavesDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES | Get-RobocopyProgress -Source $SavesSource -Title "Restoring Saves..."
+        $label_right.Text += "`r`nRestoring Saves..."
+        RoboCopy-WithProgress -Source $SavesSource -Destination $SavesDestination -Verbose
     }
 
 
     if ($checkBox_BIOS.Checked) {
-            $BIOSSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'BIOS'
-            $BiosDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'BIOS'
-            Robocopy "$BIOSSource" "$BiosDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES | Get-RobocopyProgress -Source $BIOSSource -Title "Restoring BIOS..."
-            $label.Text = ""
+        $BIOSSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'BIOS'
+        $BiosDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'BIOS'
+        # Robocopy "$BIOSSource" "$BiosDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES | Get-RobocopyProgress -Source $BIOSSource -Title "Restoring BIOS..."
+        $label_right.Text += "`r`nRestoring BIOS..."
+        RoboCopy-WithProgress -Source $BIOSSource -Destination $BiosDestination -Verbose
     }
 
     if ($checkBox_Retroarch.Checked) {
         $RetroarchSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'RetroArch\.retroarch'
         $RetroarchDestination = Join-Path -Path ${Drive_Letter}: -ChildPath '\RetroArch\.retroarch'
         #Copy-Files -Source $RetroarchSource -Destination $RetroarchDestination
-        Robocopy "$RetroarchSource" "$RetroarchDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES *.cfg  /LEV:1 | Get-RobocopyProgress -Source $RetroarchSource -Title "Restoring Retroarch configuration..." -Inclusion "retroarch.cfg"
-        $label.Text = ""
+        # Robocopy "$RetroarchSource" "$RetroarchDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES *.cfg  /LEV:1 | Get-RobocopyProgress -Source $RetroarchSource -Title "Restoring Retroarch configuration..." -Inclusion "retroarch.cfg"
+        $label_right.Text += "`r`nRestoring Retroarch configuration..."
+        RoboCopy-WithProgress -Source $RetroarchSource -Destination $RetroarchDestination -Verbose
     }
 
     if ($checkBox_OnionConfigFlags.Checked) {
-        $OnionConfigFlagsSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath '.tmp_update\config\.*'
+        $OnionConfigFlagsSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath '.tmp_update\config'
         $OnionConfigFlagsDestination = Join-Path -Path ${Drive_Letter}: -ChildPath '.tmp_update\config'
 
-        Robocopy "$OnionConfigFlagsSource" "$OnionConfigFlagsDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES .* | Get-RobocopyProgress -Source $OnionConfigFlagsSource -Title "Restoring Onion configuration..." 
-        $label.Text = ""
+        # Robocopy "$OnionConfigFlagsSource" "$OnionConfigFlagsDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES .* | Get-RobocopyProgress -Source $OnionConfigFlagsSource -Title "Restoring Onion configuration..." 
+        $label_right.Text += "`r`nRestoring Onion configuration..."
+        RoboCopy-WithProgress -Source $OnionConfigFlagsSource -Destination $OnionConfigFlagsDestination -Verbose
         #Copy-Files -Source $OnionConfigFlagsSource -Destination $OnionConfigFlagsDestination
     }
 
+    $label_right.Text += "`r`n`r`nBackup restoration Finished !"
+    $soundPlayer = New-Object System.Media.SoundPlayer
+    $soundPlayer.SoundLocation = "tools\res\success.wav"
+    $soundPlayer.Play()
 
 }
 
@@ -553,6 +562,7 @@ if (-not $Update_File) {
     $button_Restore.Text = "Restore"
     $button_Restore.Location = New-Object System.Drawing.Point(820, 400)
     $button_Restore.Add_Click({ Perform_Restore })
+    $button_Restore.Enabled = 0
     $form.Controls.Add($button_Restore)
     
     
