@@ -183,7 +183,7 @@ $OKButton_Click = {
             $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select a drive to format"
             if ($CurrentDrive -ne $null) {
-                . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[1]
+                . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
             }
             $OKButton.Enabled = 1
         }
