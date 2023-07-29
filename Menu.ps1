@@ -122,7 +122,7 @@ $OKButton_Click = {
             $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select target drive for Onion"
             if ($CurrentDrive -ne $null) {
-                # Sometimes a scandisk is required to format 
+                # Sometimes a checkdisk is required to format 
                 # $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
                 # $wgetProcess.WaitForExit()
                 . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
@@ -140,7 +140,7 @@ $OKButton_Click = {
         if ($selectedOption.text -eq $InstallUpdateRadioButton2.Text) {
             # "Migrate stock SD card to a new SD card with Onion"
             $OKButton.Enabled = 0
-            $messageBoxText ="Insert Miyoo Stock SD card now."
+            $messageBoxText = "Insert Miyoo Stock SD card now."
             $messageBoxCaption = "Stock Backup"
             $messageBoxButtons = [System.Windows.Forms.MessageBoxButtons]::OK
             $messageBoxIcon = [System.Windows.Forms.MessageBoxIcon]::Information
@@ -149,14 +149,14 @@ $OKButton_Click = {
             if ($CurrentDrive -ne $null) {
                 . "$PSScriptRoot\Onion_Save_Backup.ps1" -Drive_Number $CurrentDrive[0]
                 
-                $messageBoxText ="Insert Onion target SD card now."
+                $messageBoxText = "Insert Onion target SD card now."
                 $messageBoxCaption = "Backup restoration"
                 $messageBoxButtons = [System.Windows.Forms.MessageBoxButtons]::OK
                 $messageBoxIcon = [System.Windows.Forms.MessageBoxIcon]::Information
                 [System.Windows.Forms.MessageBox]::Show($messageBoxText, $messageBoxCaption, $messageBoxButtons, $messageBoxIcon)
                 $CurrentDrive = Get_Drive "Select target drive for Onion"
                 if ($CurrentDrive -ne $null) {
-                    # Sometimes a scandisk is required to format 
+                    # Sometimes a chkdsk is required to format 
                     # $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/k chkdsk $($CurrentDrive[1]): /F /X & echo.&echo Close this window to continue"  -PassThru
                     # $wgetProcess.WaitForExit()
                     . "$PSScriptRoot\Disk_Format.ps1" -Drive_Number $CurrentDrive[0]
@@ -169,7 +169,7 @@ $OKButton_Click = {
             }
             $OKButton.Enabled = 1
         }
-        if ($selectedOption.text -eq "Check for errors (scandisk)") {
+        if ($selectedOption.text -eq $OtherToolsRadioButton3.text) {   #Check for errors (chkdsk)
             $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select a drive to check"
             if ($CurrentDrive -ne $null) {
@@ -370,7 +370,7 @@ $OtherToolsGroupBox.Controls.Add($OtherToolsRadioButton2)
 $OtherToolsRadioButton3 = New-Object System.Windows.Forms.RadioButton
 $OtherToolsRadioButton3.Location = New-Object System.Drawing.Point(20, 60)
 $OtherToolsRadioButton3.Size = New-Object System.Drawing.Size(250, 20)
-$OtherToolsRadioButton3.Text = "Check for errors (scandisk)"
+$OtherToolsRadioButton3.Text = "Check for errors (chkdsk)"
 $OtherToolsGroupBox.Controls.Add($OtherToolsRadioButton3)
 
 
@@ -388,7 +388,7 @@ $AboutTab.Controls.Add($AboutLabel)
 
 # Create PictureBox control for the Patreon logo
 $PatreonLogo = New-Object System.Windows.Forms.PictureBox
-$PatreonLogo.ImageLocation = "tools\res\patreon.jpg" # Replace with the actual image path
+$PatreonLogo.ImageLocation = "tools\res\patreon.jpg" 
 $PatreonLogo.Location = New-Object System.Drawing.Point(20, 80)
 $PatreonLogo.Size = New-Object System.Drawing.Size(100, 50)
 $PatreonLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
@@ -399,7 +399,7 @@ $PatreonLogo.Add_Click({
 $AboutTab.Controls.Add($PatreonLogo)
 
 $coffeeLogo = New-Object System.Windows.Forms.PictureBox
-$coffeeLogo.ImageLocation = "tools\res\buymeacoffee.jpg" # Replace with the actual image path
+$coffeeLogo.ImageLocation = "tools\res\buymeacoffee.jpg" 
 $coffeeLogo.Location = New-Object System.Drawing.Point(130, 80)
 $coffeeLogo.Size = New-Object System.Drawing.Size(100, 50)
 $coffeeLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
@@ -421,7 +421,7 @@ $AboutTab.Controls.Add($AboutLabel)
 
 # Create PictureBox control for the Patreon logo
 $githubLogo = New-Object System.Windows.Forms.PictureBox
-$githubLogo.ImageLocation = "tools\res\github.jpg" # Replace with the actual image path
+$githubLogo.ImageLocation = "tools\res\github.jpg" 
 $githubLogo.Location = New-Object System.Drawing.Point(20, 160)
 $githubLogo.Size = New-Object System.Drawing.Size(100, 50)
 $githubLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
@@ -432,7 +432,7 @@ $githubLogo.Add_Click({
 $AboutTab.Controls.Add($githubLogo)
 
 $kofiLogo = New-Object System.Windows.Forms.PictureBox
-$kofiLogo.ImageLocation = "tools\res\kofi.jpg" # Replace with the actual image path
+$kofiLogo.ImageLocation = "tools\res\kofi.jpg" 
 $kofiLogo.Location = New-Object System.Drawing.Point(130, 160)
 $kofiLogo.Size = New-Object System.Drawing.Size(100, 50)
 $kofiLogo.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::Zoom
@@ -466,6 +466,24 @@ $Form.Controls.Add($OKButton)
 
 # Add the TabControl control to the main window
 $Form.Controls.Add($TabControl)
+
+
+# Create a PictureBox control for the image
+$EjectImg = New-Object System.Windows.Forms.PictureBox
+$EjectImg.ImageLocation = "tools\res\eject.png" 
+$EjectImg.Location = New-Object System.Drawing.Point(460, 255)
+$EjectImg.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::AutoSize
+$EjectImg.Cursor = [System.Windows.Forms.Cursors]::Hand
+$EjectImg.Add_Click({
+        $CurrentDrive = Get_Drive "Select a drive to eject"
+        if ($CurrentDrive -ne $null) {
+            write-host "Ejecting drive $($CurrentDrive[1]):"
+            $argument = "$($CurrentDrive[1]):  -f -d -b"
+            Start-Process -FilePath "tools\RemoveDrive.exe" -ArgumentList $argument -WorkingDirectory $PSScriptRoot -WindowStyle Hidden
+        }
+    })
+$form.Controls.Add($EjectImg)
+$EjectImg.BringToFront()
 
 # Show the window
 $Form.ShowDialog()
