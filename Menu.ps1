@@ -163,7 +163,7 @@ $OKButton_Click = {
                     if ($?) {
                         . "$PSScriptRoot\Onion_Install_Download.ps1"
                         . "$PSScriptRoot\Onion_Install_Extract.ps1" -Target "$($CurrentDrive[1]):"
-                        . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
+                        . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target "$($CurrentDrive[1]):"
                     }
                 }
             }
@@ -201,7 +201,7 @@ $OKButton_Click = {
             $OKButton.Enabled = 0
             $CurrentDrive = Get_Drive "Select a destination drive"
             if ($CurrentDrive -ne $null) {
-                . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target $CurrentDrive[1]
+                . "$PSScriptRoot\Onion_Save_Restore.ps1" -Target "$($CurrentDrive[1]):"
             }
             $OKButton.Enabled = 1
         }

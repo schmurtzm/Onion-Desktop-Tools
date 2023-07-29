@@ -254,7 +254,7 @@ function RoboCopy-WithProgress {
 
 function Perform_Restore {
     $BackupFolder = $flowLayoutPanel.Controls | Where-Object { $_.Checked } | Select-Object -ExpandProperty Text
-    $messageBoxText = "Selected backup:`n$BackupFolder`nTarget:`n${Drive_Letter}:.`n`n" +
+    $messageBoxText = "Selected backup:`n$BackupFolder`nTarget:`n${Target}`n`n" +
     "Are you sure that you want to restore this backup ?`n"
     $messageBoxCaption = "Backup restoration Confirmation"
     $messageBoxButtons = [System.Windows.Forms.MessageBoxButtons]::YesNo
@@ -265,10 +265,11 @@ function Perform_Restore {
 
         
     
-        $label_right.Text += "`r`n`r`n`------------------- BACKUP RESTORATION -------------------`r`n"
+        $label_right.Text += "`r`n`r`n------------------- BACKUP RESTORATION -------------------`r`n"
+        $label_right.Text += "Selected backup:`r`n$BackupFolder`r`nTarget:${Target}`r`n"
 
         $RomsSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'Roms'
-        $RomsDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'Roms'
+        $RomsDestination = Join-Path -Path ${Target} -ChildPath 'Roms'
 
         Write-Host "BackupFolder: $BackupFolder `nRomsSource: $RomsSource `nRomsDestination: $RomsDestination"
         # V�rification des cases coch�es
@@ -283,7 +284,7 @@ function Perform_Restore {
 
         if ($checkBox_Imgs.Checked) {
             $ImgsSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'Roms'
-            $ImgsDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'Roms'
+            $ImgsDestination = Join-Path -Path ${Target} -ChildPath 'Roms'
             # Robocopy "$ImgsSource" "$ImgsDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES *.png | Get-RobocopyProgress -Source $RomsSource -Title "Restoring images..." -Inclusion "Imgs"
             $label_right.Text += "`r`nRestoring images..."
             RoboCopy-WithProgress -Source $ImgsSource -Destination $ImgsDestination -Verbose
@@ -292,7 +293,7 @@ function Perform_Restore {
 
         if ($checkBox_Saves.Checked) {
             $SavesSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'Saves'
-            $SavesDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'Saves'
+            $SavesDestination = Join-Path -Path ${Target} -ChildPath 'Saves'
             # Robocopy "$SavesSource" "$SavesDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES | Get-RobocopyProgress -Source $SavesSource -Title "Restoring Saves..."
             $label_right.Text += "`r`nRestoring Saves..."
             RoboCopy-WithProgress -Source $SavesSource -Destination $SavesDestination -Verbose
@@ -301,7 +302,7 @@ function Perform_Restore {
 
         if ($checkBox_BIOS.Checked) {
             $BIOSSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'BIOS'
-            $BiosDestination = Join-Path -Path ${Drive_Letter}: -ChildPath 'BIOS'
+            $BiosDestination = Join-Path -Path ${Target} -ChildPath 'BIOS'
             # Robocopy "$BIOSSource" "$BiosDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES | Get-RobocopyProgress -Source $BIOSSource -Title "Restoring BIOS..."
             $label_right.Text += "`r`nRestoring BIOS..."
             RoboCopy-WithProgress -Source $BIOSSource -Destination $BiosDestination -Verbose
@@ -309,7 +310,7 @@ function Perform_Restore {
 
         if ($checkBox_Retroarch.Checked) {
             $RetroarchSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath 'RetroArch\.retroarch'
-            $RetroarchDestination = Join-Path -Path ${Drive_Letter}: -ChildPath '\RetroArch\.retroarch'
+            $RetroarchDestination = Join-Path -Path ${Target} -ChildPath '\RetroArch\.retroarch'
             #Copy-Files -Source $RetroarchSource -Destination $RetroarchDestination
             # Robocopy "$RetroarchSource" "$RetroarchDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES *.cfg  /LEV:1 | Get-RobocopyProgress -Source $RetroarchSource -Title "Restoring Retroarch configuration..." -Inclusion "retroarch.cfg"
             $label_right.Text += "`r`nRestoring Retroarch configuration..."
@@ -318,7 +319,7 @@ function Perform_Restore {
 
         if ($checkBox_OnionConfigFlags.Checked) {
             $OnionConfigFlagsSource = Join-Path -Path "$ScriptDirectory\backups\$BackupFolder" -ChildPath '.tmp_update\config'
-            $OnionConfigFlagsDestination = Join-Path -Path ${Drive_Letter}: -ChildPath '.tmp_update\config'
+            $OnionConfigFlagsDestination = Join-Path -Path ${Target} -ChildPath '.tmp_update\config'
 
             # Robocopy "$OnionConfigFlagsSource" "$OnionConfigFlagsDestination" /R:3 /W:1 /s /E /NJH /IS /NJS /NDL /NC /BYTES .* | Get-RobocopyProgress -Source $OnionConfigFlagsSource -Title "Restoring Onion configuration..." 
             $label_right.Text += "`r`nRestoring Onion configuration..."

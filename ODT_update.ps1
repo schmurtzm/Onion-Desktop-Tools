@@ -12,7 +12,6 @@ if ($releaseInfo -and $releaseInfo.tag_name) {
 }
 else {
     Write-Host "Failed to retrieve the latest version from GitHub API. No action required."
-    return
 }
 
 # Read the Menu.ps1 file and get the version number from the first line
@@ -23,7 +22,6 @@ if ($menuContent -and $menuContent[0]) {
 }
 else {
     Write-Host "Failed to retrieve the current version from Menu.ps1 file. No action required."
-    return
 }
 
 # Compare the versions

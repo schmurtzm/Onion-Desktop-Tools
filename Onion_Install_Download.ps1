@@ -130,10 +130,8 @@ function Download-Button_Click {
     $downloadPath = Join-Path $ScriptDirectory "downloads"
     New-Item -ItemType Directory -Force -Path $downloadPath | Out-Null
     $Update_FileName = $url.Split("/")[-1]
-    $Update_FullPath = Get-Item -Path "downloads\$Update_FileName"
 
     Write-Host "url $url" 
-    Write-Host "Update_FullPath $Update_FullPath" 
 
     if (Test-Path downloads\$Update_FileName) {
         $Downloaded_size = Get-Item -Path downloads\$Update_FileName | Select-Object -ExpandProperty Length
