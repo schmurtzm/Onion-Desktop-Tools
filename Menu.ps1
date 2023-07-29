@@ -140,10 +140,20 @@ $OKButton_Click = {
         if ($selectedOption.text -eq $InstallUpdateRadioButton2.Text) {
             # "Migrate stock SD card to a new SD card with Onion"
             $OKButton.Enabled = 0
+            $messageBoxText ="Insert Miyoo Stock SD card now."
+            $messageBoxCaption = "Stock Backup"
+            $messageBoxButtons = [System.Windows.Forms.MessageBoxButtons]::OK
+            $messageBoxIcon = [System.Windows.Forms.MessageBoxIcon]::Information
+            [System.Windows.Forms.MessageBox]::Show($messageBoxText, $messageBoxCaption, $messageBoxButtons, $messageBoxIcon)
             $CurrentDrive = Get_Drive "Select stock SD card"
             if ($CurrentDrive -ne $null) {
                 . "$PSScriptRoot\Onion_Save_Backup.ps1" -Drive_Number $CurrentDrive[0]
-            
+                
+                $messageBoxText ="Insert Onion target SD card now."
+                $messageBoxCaption = "Backup restoration"
+                $messageBoxButtons = [System.Windows.Forms.MessageBoxButtons]::OK
+                $messageBoxIcon = [System.Windows.Forms.MessageBoxIcon]::Information
+                [System.Windows.Forms.MessageBox]::Show($messageBoxText, $messageBoxCaption, $messageBoxButtons, $messageBoxIcon)
                 $CurrentDrive = Get_Drive "Select target drive for Onion"
                 if ($CurrentDrive -ne $null) {
                     # Sometimes a scandisk is required to format 
