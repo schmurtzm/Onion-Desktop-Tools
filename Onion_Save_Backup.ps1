@@ -524,7 +524,7 @@ elseif ($script:SdCardState -eq "Stock") {
 
 }
 else {
-    $Backup_Lbl.Text = "Not Onion or Stock on ${Drive_Letter}"
+    $Backup_Lbl.Text = "Not Onion or Stock on ${Drive_Letter}:"
     $checkBox_Retroarch.Enabled = 0
 
     $checkBox_Roms.Enabled = 0
