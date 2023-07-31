@@ -1,7 +1,7 @@
 # Onion-Desktop-Tools
 A software to install and configure Onion OS for Miyoo Mini
 
-[Download Onion Destop Tools.](https://github.com/schmurtzm/Onion-Desktop-Tools/archive/refs/tags/v0.0.5.zip)
+[Download Onion Destop Tools.](https://github.com/schmurtzm/Onion-Desktop-Tools/archive/refs/tags/v0.0.6.zip)
 
 Onion Desktop Tools is a Windows program that simplifies the preparation of a micro SD card for Onion.
 
