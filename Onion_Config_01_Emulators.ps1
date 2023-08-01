@@ -135,7 +135,14 @@ function FillTable {
 
     
     $labelRowCount.Text = "Items not installed: $rowCountWithoutColor`nItems installed: $rowCountGreen`nItem not installed but roms are here: $rowCountOrange"
+    $filter = $textBoxFilter.Text.Trim()
 
+    foreach ($row in $dataGridView.Rows) {
+        $row.Visible = $row.Cells[0].Value -like "*$filter*" -or
+        $row.Cells[1].Value -like "*$filter*" -or
+        $row.Cells[2].Value -like "*$filter*" -or
+        $row.Cells[3].Value -like "*$filter*"
+    }
 }
 
 function Get-SubDirectories {
@@ -177,7 +184,7 @@ $DataGrid_CellDoubleClick = {
 
     if ($columnIndex -eq 2) {
         #  to handle "Emu Folder" column cell click event 
-        $emuFolderPath = "$Target\Emu\$SelEmuFolder"
+        $emuFolderPath = "$Target\$SelType\$SelEmuFolder"
         if (Test-Path $emuFolderPath -PathType Container) {
             Invoke-Item -Path $emuFolderPath
         }
