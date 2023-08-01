@@ -1,6 +1,7 @@
 ﻿$ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
+[Environment]::CurrentDirectory = Get-Location
 
 $Drive_Letter = $args[0]
 #  $Drive_Letter = "l"

@@ -5,7 +5,7 @@
 ::YAwzuBVtJxjWCl3EqQJgSA==
 ::ZR4luwNxJguZRRnk
 ::Yhs/ulQjdF+5
-::cxAkpRVqdFKZSDk=
+::cxAkpRVqdFKZSTk=
 ::cBs/ulQjdF+5
 ::ZR41oxFsdFKZSDk=
 ::eBoioBt6dFKZSDk=
@@ -26,12 +26,14 @@
 ::ZQ0/vhVqMQ3MEVWAtB9wSA==
 ::Zg8zqx1/OA3MEVWAtB9wSA==
 ::dhA7pRFwIByZRRnk
-::Zh4grVQjdCyDJGyX8VAjFDpYSRyLL1eeCaIS5Of66/m7j0QEW+1/VYbV04ixBOUF1mrqfJkjm15fi8AYAwsVSh2kYhwIhmBLuWrFE8KPuBvuWgi96UQ8CCU5x1TZmCMYb917lc8GnSWm+S0=
+::Zh4grVQjdCyDJGyX8VAjFDpYSRyLL1eeCaIS5Of66/m7j0QEW+1/VYbV04ixBOUF1mrqfJkjm15fi8AYAwsVSh2kYhwIhmBLuWrFE8KPuBvuWgi96UQ8CCtxn2aw
 ::YB416Ek+ZW8=
 ::
 ::
 ::978f952a14a936cc963da21a135fa983
 @echo off
 cd /d %~dp0
+md backups 2> NUL
+md downloads\ODT_updates 2> NUL
 copy ODT_update.ps1 ODT_update_temporary.ps1 /Y >NUL
 powershell -ExecutionPolicy Bypass -File ODT_update_temporary.ps1

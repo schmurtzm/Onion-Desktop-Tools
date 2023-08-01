@@ -12,6 +12,7 @@ $script:SdCardState = ""
 $ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
+[Environment]::CurrentDirectory = Get-Location
 
 if (-not $Target) {
     . "$PSScriptRoot\Disk_selector.ps1"
@@ -416,7 +417,7 @@ function Button_Click {
             $label_right.SelectionStart = $label_right.Text.Length
             $label_right.ScrollToCaret()
 
-            $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/c @title extracting $Update_File to $Target & mode con:cols=80 lines=1 & $7zPath x -y -aoa `"downloads\$Update_File`" -o`"$Target\`"" -PassThru
+            $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/c @title extracting $Update_File to $Target & mode con:cols=80 lines=1 & `"$7zPath`" x -y -aoa `"downloads\$Update_File`" -o`"$Target\`"" -PassThru
             while (!$wgetProcess.HasExited) {
                 Start-Sleep -Milliseconds 1000  # Attendre une demi-seconde
             }

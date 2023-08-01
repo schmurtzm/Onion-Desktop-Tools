@@ -1,4 +1,4 @@
-# Onion-Desktop-Tools-v0.0.6
+# Onion-Desktop-Tools-v0.0.7
 
 param (
     [Parameter(Mandatory = $false)]
@@ -8,6 +8,16 @@ $selectedTag = ""
 $ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
+[Environment]::CurrentDirectory = Get-Location
+
+if (-Not (Test-Path "downloads" -PathType Container)) {
+    New-Item -ItemType Directory -Path "downloads"
+}
+if (-Not (Test-Path "backups" -PathType Container)) {
+    New-Item -ItemType Directory -Path "backups"
+}
+
+Remove-Item -Path ODT_update_temporary.ps1 -ErrorAction SilentlyContinue
 
 # Read the Menu.ps1 file and get the version number from the first line
 $menuContent = Get-Content -Path $MyInvocation.MyCommand.Path

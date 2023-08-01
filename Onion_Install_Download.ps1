@@ -1,6 +1,7 @@
 ﻿$ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
+[Environment]::CurrentDirectory = Get-Location
 
 
 Add-Type -AssemblyName System.Windows.Forms

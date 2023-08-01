@@ -10,6 +10,7 @@ $SdCardState = ""
 $ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
+[Environment]::CurrentDirectory = Get-Location
 
 # $Target = "h:"
 if (-not $Target) {

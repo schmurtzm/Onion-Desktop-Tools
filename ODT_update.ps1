@@ -1,4 +1,17 @@
-﻿Add-Type -AssemblyName System.Windows.Forms
+﻿$ScriptDirectory = $PSScriptRoot
+Set-Location -Path $ScriptDirectory
+[Environment]::CurrentDirectory = Get-Location
+
+
+if (-Not (Test-Path "downloads\ODT_updates" -PathType Container)) {
+    New-Item -ItemType Directory -Path "downloads\ODT_updates"
+}
+if (-Not (Test-Path "backups" -PathType Container)) {
+    New-Item -ItemType Directory -Path "backups"
+}
+
+
+Add-Type -AssemblyName System.Windows.Forms
 
 # GitHub API URL
 $apiUrl = "https://api.github.com/repos/Schmurtzm/Onion-Desktop-Tools/releases/latest"
@@ -76,7 +89,9 @@ if ($latestVersion -gt $currentVersion) {
 
         # Extract the contents of the ZIP file using 7-Zip
         $extractDir = "downloads\ODT_updates\tempUpdateFolder"
-
+        if (-Not (Test-Path "downloads\ODT_updates\tempUpdateFolder" -PathType Container)) {
+            New-Item -ItemType Directory -Path "downloads\ODT_updates\tempUpdateFolder"
+        }
         $7zPath = "tools\7z.exe"
         $output = & $7zPath x -y $zipFilePath "-o$extractDir"
 

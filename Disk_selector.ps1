@@ -6,6 +6,7 @@ Write-Host "Title: $Title"
 $ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
+[Environment]::CurrentDirectory = Get-Location
 Add-Type -AssemblyName System.Windows.Forms
 
 
@@ -86,6 +87,10 @@ function RefreshDriveList {
         ShowNoDriveFoundLabel
         $locationY = 50
     }
+    if ($driveRadioButtons.Count -eq 1) {
+        $driveRadioButtons[0].Checked = $true
+    }
+
 
     $gb.Height = $locationY + 20
     $refreshButton.Top = $gb.Bottom + 20

@@ -12,6 +12,7 @@ $script:SdCardState = ""
 $ScriptPath = $MyInvocation.MyCommand.Path
 $ScriptDirectory = Split-Path $ScriptPath -Parent
 Set-Location -Path $ScriptDirectory
+[Environment]::CurrentDirectory = Get-Location
 
 if (-not $Target) {
     . "$PSScriptRoot\Disk_selector.ps1"
@@ -21,7 +22,7 @@ if (-not $Target) {
     $Target = "$Drive_Letter`:"
 }
 
-$7zPath = "tools\7z.exe"
+$7zPath = "$PSScriptRoot\tools\7z.exe"
 # Vérification de l'espace disponible sur le lecteur cible
 $driveInfo = Get-PSDrive -PSProvider 'FileSystem' | Where-Object { $_.Root -eq "$Target\" }
 $freeSpace = $driveInfo.Free
@@ -219,7 +220,7 @@ function Button_Click {
             $label_right.SelectionStart = $label_right.Text.Length
             $label_right.ScrollToCaret()
 
-            $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/c @title extracting $Update_File to $Target & mode con:cols=80 lines=1 & $7zPath x -y -aoa `"downloads\$Update_File`" -o`"$Target\`"" -PassThru
+            $wgetProcess = Start-Process -FilePath "cmd" -ArgumentList "/c @title extracting $Update_File to $Target & mode con:cols=80 lines=1 & `"$7zPath`" x -y -aoa `"downloads\$Update_File`" -o`"$Target\`"" -PassThru
             $wgetProcess.WaitForExit()
             $exitCode = $wgetProcess.ExitCode
             # while (!$wgetProcess.HasExited) {
