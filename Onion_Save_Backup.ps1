@@ -467,7 +467,7 @@ $form.Controls.Add($checkBox_OnionConfigFlags)
 $progressBar = New-Object System.Windows.Forms.ProgressBar
 $progressBar.Size = New-Object System.Drawing.Size(260, 20)
 $progressBar.Location = New-Object System.Drawing.Point(10, 220)
-$progressBar.max = 100
+$progressBar.Maximum = 100
 $form.Controls.Add($progressBar)
 
 $button_Backup = New-Object System.Windows.Forms.Button

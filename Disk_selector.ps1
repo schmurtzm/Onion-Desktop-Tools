@@ -89,6 +89,7 @@ function RefreshDriveList {
     }
     if ($driveRadioButtons.Count -eq 1) {
         $driveRadioButtons[0].Checked = $true
+        $button_ok.Enabled = $true
     }
 
 
