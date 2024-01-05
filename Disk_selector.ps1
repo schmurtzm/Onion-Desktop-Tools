@@ -49,19 +49,19 @@ function RefreshDriveList {
     foreach ($drive in $lines) {
         # if ($drive -match '\*?DRIVE (\d+) -\s+([\d.]+[KMGTP]?iB)\s+(.*?)\s+Fw=(\w+)\s+Sno=(\w+)\s+(\w+):') {
     
-        if ($drive -match '\*?DRIVE (\d+) -\s+([\d.]+[KMGTP]?iB)\s+(.*?)\s+Fw=(\w+)*\s+Sno=(\w+)*\s+(\w+):') {
+        if ($drive -match 'DRIVE (\d+) -\s*(.+?[\d.,]+[KMGTP]?iB)?\s*(.+?)?\s*Fw=(\d*)\s+Sno=(\S*)\s*(\w):') {
             $driveNumber = $Matches[1]
             $driveSize = $Matches[2]
             $driveDescription = $Matches[3].Trim()
-            $firmware = $Matches[4]
-            $serialNumber = $Matches[5]
+            #$firmware = $Matches[4]
+            #$serialNumber = $Matches[5]
             $driveLetter = $Matches[6]
 
             Write-Host "Drive Number: $driveNumber"
             Write-Host "Drive Size: $driveSize"
             Write-Host "Drive Description: $driveDescription"
-            Write-Host "Firmware: $firmware"
-            Write-Host "Serial Number: $serialNumber"
+            #Write-Host "Firmware: $firmware"
+            #Write-Host "Serial Number: $serialNumber"
             Write-Host "Drive Letter: $driveLetter"
     
             Write-Host "--------------------------"
