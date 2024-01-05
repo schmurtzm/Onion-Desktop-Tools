@@ -1,4 +1,4 @@
-# Onion-Desktop-Tools-v0.0.8
+# Onion-Desktop-Tools-v0.0.9
 
 param (
     [Parameter(Mandatory = $false)]
