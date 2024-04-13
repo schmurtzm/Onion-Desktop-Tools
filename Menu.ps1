@@ -157,7 +157,7 @@ $OKButton_Click = {
             [System.Windows.Forms.MessageBox]::Show($messageBoxText, $messageBoxCaption, $messageBoxButtons, $messageBoxIcon)
             $CurrentDrive = Get_Drive "Select stock SD card"
             if ($CurrentDrive -ne $null) {
-                . "$PSScriptRoot\Onion_Save_Backup.ps1" -Drive_Number $CurrentDrive[0]
+                . "$PSScriptRoot\Onion_Save_Backup.ps1" $($CurrentDrive[1])
                 
                 $messageBoxText = "Insert Onion target SD card now."
                 $messageBoxCaption = "Backup restoration"
