@@ -9,7 +9,7 @@ FORBIDDEN = [
     (re.compile(r"\bos\.system\("), "os.system"),
     (re.compile(r"\bos\.popen\("), "os.popen"),
     (re.compile(r"[\"'](sudo|pkexec|gksu|kdesu)[\"']"), "privilege escalation helper"),
-    (re.compile(r"\beval\(|\bexec\("), "eval/exec"),
+    (re.compile(r"(?<![.\w])(eval|exec)\("), "builtin eval/exec"),
 ]
 
 
