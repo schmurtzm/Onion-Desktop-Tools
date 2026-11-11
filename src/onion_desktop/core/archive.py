@@ -29,6 +29,7 @@ from .safe_fs import (
     check_fat_name,
     drop_cache,
     fsync_dir,
+    open_new_file,
     safe_join,
     validate_relative,
 )
@@ -205,7 +206,7 @@ def _extract_member(
     tmp = target.with_name(f"{TMP_PREFIX}{target.name}")
     written = 0
     try:
-        with zf.open(info) as src, open(tmp, "wb") as out:
+        with zf.open(info) as src, os.fdopen(open_new_file(tmp), "wb") as out:
             while True:
                 cancel.raise_if_cancelled()
                 chunk = src.read(CHUNK)

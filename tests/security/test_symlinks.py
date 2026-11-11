@@ -23,3 +23,27 @@ def test_walk_does_not_follow_links(tmp_path):
     files = [e.rel for e in walk_files(tmp_path, on_skipped=lambda r, w: skipped.append(r))]
     assert files == [PurePosixPath("d/a.txt")]
     assert {str(s) for s in skipped} == {"d/link.txt", "d/dirlink"}
+
+
+def test_planted_temp_symlink_is_not_followed(tmp_path):
+    """A crafted card may contain '.odt-tmp-<name>' symlinks pointing outside the card."""
+    import zipfile
+
+    from onion_desktop.core.archive import extract_zip
+    from onion_desktop.core.copier import CopyItem, execute_copy
+    victim = tmp_path / "victim.txt"
+    victim.write_text("precious")
+    card = tmp_path / "card"
+    (card / "BIOS").mkdir(parents=True)
+    (card / "BIOS/.odt-tmp-x.bin").symlink_to(victim)
+    z = tmp_path / "a.zip"
+    with zipfile.ZipFile(z, "w") as zf:
+        zf.writestr("BIOS/x.bin", b"payload")
+    assert extract_zip(z, card).ok
+    assert victim.read_text() == "precious" and (card / "BIOS/x.bin").read_bytes() == b"payload"
+
+    (card / "BIOS/.odt-tmp-y.bin").symlink_to(victim)
+    src = tmp_path / "src.bin"
+    src.write_bytes(b"data")
+    rep = execute_copy([CopyItem(src, PurePosixPath("BIOS/y.bin"), 4)], card)
+    assert rep.ok and victim.read_text() == "precious"

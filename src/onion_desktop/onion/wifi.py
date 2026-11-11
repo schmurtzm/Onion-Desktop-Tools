@@ -16,7 +16,7 @@ import string
 from pathlib import Path
 
 from ..core.exceptions import OdtError, ValidationError
-from ..core.safe_fs import fsync_dir
+from ..core.safe_fs import fsync_dir, open_new_file
 
 RUNTIME = Path(".tmp_update/runtime.sh")
 RUNTIME_ORI = Path(".tmp_update/runtime_ori.sh")
@@ -103,7 +103,7 @@ def pending_ssid_count(card_root: Path) -> int:
 def _write(path: Path, text: str, mode: int = 0o644) -> None:
     tmp = path.with_name(".odt-tmp-" + path.name)
     data = text.encode("utf-8")
-    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0), mode)
+    fd = open_new_file(tmp, mode)
     try:
         os.write(fd, data)
         os.fsync(fd)

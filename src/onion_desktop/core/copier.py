@@ -19,6 +19,7 @@ from .safe_fs import (
     FAT32_MAX_FILE_SIZE,
     check_fat_name,
     fsync_dir,
+    open_new_file,
     safe_join,
 )
 
@@ -205,7 +206,7 @@ def _copy_one(item: CopyItem, dst: Path, cancel: CancelToken, want_hash: bool, f
     except OSError as exc:
         raise OdtError(f"cannot open source: {exc.strerror or exc}") from exc
     try:
-        with os.fdopen(fd, "rb") as src, open(tmp, "wb") as out:
+        with os.fdopen(fd, "rb") as src, os.fdopen(open_new_file(tmp), "wb") as out:
             while True:
                 cancel.raise_if_cancelled()
                 chunk = src.read(CHUNK)

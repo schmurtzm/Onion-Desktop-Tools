@@ -168,6 +168,23 @@ def check_fat_name(rel: PurePosixPath) -> str | None:
     return None
 
 
+def open_new_file(path: Path, mode: int = 0o644) -> int:
+    """Create *path* exclusively without following symlinks; returns an fd.
+
+    A leftover entry at *path* (e.g. a temp file planted on an untrusted card, possibly a symlink)
+    is unlinked first — unlinking removes the link itself, never its target.
+    """
+    try:
+        st = os.lstat(path)
+    except FileNotFoundError:
+        pass
+    else:
+        if stat.S_ISDIR(st.st_mode):
+            raise UnsafePathError(f"Unexpected folder at temporary path {path}")
+        os.unlink(path)
+    return os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), mode)
+
+
 def fsync_dir(path: Path) -> None:
     try:
         fd = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
