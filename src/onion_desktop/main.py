@@ -66,7 +66,7 @@ def _self_test() -> int:
     QTimer.singleShot(0, app.quit)
     app.exec()
     from PySide6.QtGui import QImageReader
-    fmts = {f.data().decode() for f in QImageReader.supportedImageFormats()}
+    fmts = {bytes(f.data()).decode() for f in QImageReader.supportedImageFormats()}
     print(json.dumps({"pages": [k for k, _ in PAGES], "platform": app.platformName(), "ico_plugin": "ico" in fmts,
                       "qt": __import__("PySide6").__version__}))
     return 0 if "ico" in fmts else 2
