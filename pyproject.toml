@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "onion-desktop-tools"
+version = "0.1.0"
+description = "Install, update, back up and configure Onion OS SD cards for Miyoo Mini — Linux port of Onion Desktop Tools"
+readme = "README.md"
+license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.10"
+authors = [{ name = "Onion Desktop Tools contributors" }]
+classifiers = [
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Environment :: X11 Applications :: Qt",
+]
+dependencies = [
+  "PySide6-Essentials>=6.5,<7",
+  "httpx>=0.25,<1",
+  "jeepney>=0.8,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "pytest-qt>=4", "ruff>=0.5", "mypy>=1.8"]
+
+[project.scripts]
+onion-desktop-tools = "onion_desktop.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+onion_desktop = ["resources/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "gui: tests that need a Qt platform (run with QT_QPA_PLATFORM=offscreen)",
+  "realdevice: tests touching real block devices (never run in CI; need explicit opt-in)",
+]
+addopts = "-m 'not realdevice'"
+
+[tool.ruff]
+line-length = 125
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "RUF"]
+ignore = ["S101", "S603", "S607", "S108", "SIM102", "SIM105", "RUF001", "RUF002", "RUF003"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "B011"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src/onion_desktop"]
+exclude = ["src/onion_desktop/gui/"]
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
+module = ["jeepney.*"]
+ignore_missing_imports = true
