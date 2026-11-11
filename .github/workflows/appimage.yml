@@ -1,0 +1,85 @@
+name: AppImage
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # Building on an older runner keeps host tooling conservative; the bundle's glibc baseline
+    # (2.28) is set by the pinned PySide6 wheels, not by the runner.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build tools
+        run: sudo apt-get update && sudo apt-get install -y desktop-file-utils libegl1 libgl1 libxkbcommon0 libfontconfig1
+      - name: Build AppImage
+        run: bash packaging/appimage/build.sh
+      - name: Packaging tests (non-root runner user)
+        run: |
+          sudo apt-get install -y xvfb xauth libxcb-cursor0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-keysyms1
+          bash packaging/appimage/test_appimage.sh dist/Onion_Desktop_Tools-*-x86_64.AppImage
+      - name: glibc baseline
+        run: cat packaging/appimage/work/glibc-baseline.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appimage
+          path: |
+            dist/*.AppImage
+            dist/*.sha256
+
+  distro-smoke:
+    needs: build
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: rockylinux:8          # glibc 2.28 — the documented minimum
+            setup: dnf install -y mesa-libEGL mesa-libGL libxkbcommon fontconfig glib2 dbus-libs util-linux shadow-utils
+          - image: debian:11
+            setup: apt-get update && apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 libglib2.0-0 libdbus-1-3
+          - image: ubuntu:22.04
+            setup: apt-get update && apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 libglib2.0-0 libdbus-1-3
+          - image: fedora:latest
+            setup: dnf install -y mesa-libEGL mesa-libGL libxkbcommon fontconfig glib2 dbus-libs util-linux shadow-utils
+          - image: archlinux:latest
+            setup: pacman -Sy --noconfirm libglvnd libxkbcommon fontconfig glib2 dbus util-linux
+          - image: opensuse/leap:15.6
+            setup: zypper -n install libEGL1 libGL1 libxkbcommon0 fontconfig libglib-2_0-0 libdbus-1-3 util-linux shadow
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: appimage
+      - name: Runtime libraries
+        run: ${{ matrix.setup }}
+      - name: Run as an unprivileged user
+        run: |
+          useradd -m tester
+          cp Onion_Desktop_Tools-*-x86_64.AppImage /home/tester/odt.AppImage
+          chmod 755 /home/tester/odt.AppImage
+          su tester -c 'cd ~ && export APPIMAGE_EXTRACT_AND_RUN=1 QT_QPA_PLATFORM=offscreen && ./odt.AppImage --version && ./odt.AppImage --self-test && ./odt.AppImage --list-devices'
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build, distro-smoke]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: appimage
+          path: dist
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "Onion Desktop Tools for Linux $GITHUB_REF_NAME" --notes-file CHANGELOG.md --draft

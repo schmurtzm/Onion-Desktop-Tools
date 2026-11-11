@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>onion-desktop-tools</id>
+  <name>Onion Desktop Tools</name>
+  <summary>Install, update, back up and configure Onion OS SD cards for the Miyoo Mini</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <launchable type="desktop-id">onion-desktop-tools.desktop</launchable>
+  <description>
+    <p>Linux port of Onion Desktop Tools: format SD cards in FAT32, download and install Onion OS, manage
+    emulators and apps, edit Onion settings, pre-configure Wi-Fi, and back up or restore your games and saves.</p>
+  </description>
+  <url type="homepage">https://github.com/SpikeTheDragon40k/Onion-Desktop-Tools</url>
+  <content_rating type="oars-1.1"/>
+  <releases><release version="0.1.0" date="2026-11-11"/></releases>
+</component>

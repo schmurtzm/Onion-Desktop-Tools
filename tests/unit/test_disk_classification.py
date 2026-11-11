@@ -96,3 +96,19 @@ def test_parse_udisks_objects():
     d = disks[0]
     assert d.device == "/dev/sdb" and d.bus == "usb" and d.removable and d.drive_id == "Generic-SD-123"
     assert d.partitions[0].mount_points == ("/run/media/u/ONION",) and d.partitions[0].is_fat32
+
+
+def test_superfloppy_modelled_as_partition_zero():
+    data = {"blockdevices": [{"name": "sdd", "kname": "sdd", "path": "/dev/sdd", "type": "disk", "size": 8 * 10**9,
+                              "tran": "usb", "rm": True, "hotplug": True, "fstype": "vfat", "fsver": "FAT32",
+                              "mountpoint": "/media/u/CARD"}]}
+    (d,) = parse_lsblk(data)
+    assert d.partitions[0].number == 0 and d.partitions[0].mount_point == "/media/u/CARD"
+    assert d.mounted_partitions()
+    mo = ManagedObjects({
+        "/b/sdd": {"org.freedesktop.UDisks2.Block": {"Device": b"/dev/sdd\0", "Size": 8 * 10**9, "Drive": "/d/x",
+                                                     "IdType": "vfat", "IdVersion": "FAT32"},
+                   "org.freedesktop.UDisks2.Filesystem": {"MountPoints": [b"/media/u/CARD\0"]}},
+        "/d/x": {"org.freedesktop.UDisks2.Drive": {"ConnectionBus": "usb", "Removable": True, "Id": "x"}}})
+    (u,) = parse_disks(mo)
+    assert u.partitions[0].object_path == "/b/sdd" and u.partitions[0].mount_points == ("/media/u/CARD",)

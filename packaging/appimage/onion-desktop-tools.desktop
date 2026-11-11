@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Onion Desktop Tools
+GenericName=Onion OS SD card tool
+Comment=Install, update, back up and configure Onion OS SD cards for the Miyoo Mini
+Exec=onion-desktop-tools %F
+Icon=onion-desktop-tools
+Terminal=false
+Categories=Utility;System;
+Keywords=Onion;Miyoo;SD;card;retro;handheld;
+StartupWMClass=onion-desktop-tools

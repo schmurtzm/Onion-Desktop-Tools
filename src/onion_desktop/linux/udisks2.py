@@ -138,6 +138,16 @@ def parse_disks(mo: ManagedObjects, paths: SysPaths | None = None) -> list[Disk]
                 mount_points=tuple(m for m in mps if m),
                 object_path=ppath,
             ))
+        whole_fs = ifaces.get(I_FS)
+        if whole_fs is not None and not partitions:
+            # Filesystem directly on the whole disk ("superfloppy"): model it as partition 0 so that
+            # unmounting, protection checks and the target selector treat it like any other volume.
+            mps = tuple(bytestring(m) for m in whole_fs.get("MountPoints", []) or [])
+            partitions.append(Partition(
+                device=device, number=0, size=int(b.get("Size", 0)), fs_type=str(b.get("IdType", "")),
+                fs_version=str(b.get("IdVersion", "")), label=str(b.get("IdLabel", "")),
+                uuid=str(b.get("IdUUID", "")), mount_points=tuple(m for m in mps if m), object_path=path,
+            ))
         ptable = mo.objects[path].get(I_PTABLE, {})
         bus = str(drive.get("ConnectionBus", ""))
         disks.append(Disk(

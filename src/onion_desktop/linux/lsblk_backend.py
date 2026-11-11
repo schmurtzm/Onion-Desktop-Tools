@@ -80,6 +80,14 @@ def parse_lsblk(data: dict[str, Any], paths: SysPaths | None = None) -> list[Dis
                 mount_points=mps,
                 free_bytes=_i(fsavail) if fsavail not in (None, "") else None,
             ))
+        if not parts and _s(dev.get("fstype")):
+            mp = dev.get("mountpoint")
+            parts.append(Partition(
+                device=_s(dev.get("path")) or f"/dev/{kname}", number=0, size=_i(dev.get("size")),
+                fs_type=_s(dev.get("fstype")), fs_version=_s(dev.get("fsver")), label=_s(dev.get("label")),
+                uuid=_s(dev.get("uuid")), mount_points=tuple(m for m in (dev.get("mountpoints") or [mp]) if m),
+                free_bytes=_i(dev.get("fsavail")) if dev.get("fsavail") not in (None, "") else None,
+            ))
         disks.append(Disk(
             device=_s(dev.get("path")) or f"/dev/{kname}",
             kernel_name=kname,

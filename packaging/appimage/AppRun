@@ -1,0 +1,25 @@
+#!/bin/sh
+# AppRun for Onion Desktop Tools (Linux). Runs the bundled, isolated Python; never elevates privileges.
+HERE="$(dirname "$(readlink -f "$0")")"
+if [ "$(id -u)" = "0" ]; then
+    echo "Onion Desktop Tools must not be run as root (do not use sudo)." >&2
+    echo "Privileged disk operations are authorised through Polkit when needed." >&2
+    exit 1
+fi
+# X11 without Wayland: Qt 6's xcb plugin needs a few host libraries that some minimal installs lack.
+if [ -z "$WAYLAND_DISPLAY" ] && [ -z "$QT_QPA_PLATFORM" ] && [ -n "$DISPLAY" ]; then
+    MISSING=""
+    for lib in libxcb-cursor.so.0 libxkbcommon-x11.so.0 libxcb-icccm.so.4 libxcb-keysyms.so.1; do
+        ldconfig -p 2>/dev/null | grep -q "$lib" || MISSING="$MISSING $lib"
+    done
+    if [ -n "$MISSING" ]; then
+        echo "Warning: missing X11 libraries:$MISSING" >&2
+        echo "If the window does not open, install them:" >&2
+        echo "  Debian/Ubuntu: sudo apt install libxcb-cursor0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-keysyms1" >&2
+        echo "  Fedora:        sudo dnf install xcb-util-cursor libxkbcommon-x11 xcb-util-wm xcb-util-keysyms" >&2
+        echo "  Arch:          sudo pacman -S xcb-util-cursor libxkbcommon-x11 xcb-util-wm xcb-util-keysyms" >&2
+        echo "  openSUSE:      sudo zypper in libxcb-cursor0 libxkbcommon-x11-0 libxcb-icccm4 libxcb-keysyms1" >&2
+    fi
+fi
+export QT_PLUGIN_PATH="$HERE/usr/python/lib/python3.12/site-packages/PySide6/Qt/plugins"
+exec "$HERE/usr/python/bin/python3" -I -m onion_desktop "$@"
