@@ -38,6 +38,7 @@ onion_desktop = ["resources/*"]
 testpaths = ["tests"]
 markers = [
   "gui: tests that need a Qt platform (run with QT_QPA_PLATFORM=offscreen)",
+  "real_fs_type: do not fake FAT32 for temp card folders",
   "realdevice: tests touching real block devices (never run in CI; need explicit opt-in)",
 ]
 addopts = "-m 'not realdevice'"

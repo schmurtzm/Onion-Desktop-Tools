@@ -1,0 +1,24 @@
+{
+  "/org/freedesktop/UDisks2/block_devices/sdb": {
+    "org.freedesktop.UDisks2.Block": {"Device": {"__bytes__": "/dev/sdb"}, "Size": 31914983424,
+      "Drive": "/org/freedesktop/UDisks2/drives/Generic_SD_123", "IdType": "", "ReadOnly": false},
+    "org.freedesktop.UDisks2.PartitionTable": {"Type": "dos"}
+  },
+  "/org/freedesktop/UDisks2/block_devices/sdb1": {
+    "org.freedesktop.UDisks2.Block": {"Device": {"__bytes__": "/dev/sdb1"}, "Size": 31913934848,
+      "Drive": "/org/freedesktop/UDisks2/drives/Generic_SD_123", "IdType": "vfat", "IdVersion": "FAT32",
+      "IdLabel": "ONION", "IdUUID": "1234-ABCD"},
+    "org.freedesktop.UDisks2.Partition": {"Table": "/org/freedesktop/UDisks2/block_devices/sdb", "Number": 1,
+      "Size": 31913934848},
+    "org.freedesktop.UDisks2.Filesystem": {"MountPoints": [{"__bytes__": "/run/media/u/ONION"}]}
+  },
+  "/org/freedesktop/UDisks2/block_devices/loop0": {
+    "org.freedesktop.UDisks2.Block": {"Device": {"__bytes__": "/dev/loop0"}, "Size": 100, "Drive": "/"},
+    "org.freedesktop.UDisks2.Loop": {}
+  },
+  "/org/freedesktop/UDisks2/drives/Generic_SD_123": {
+    "org.freedesktop.UDisks2.Drive": {"Model": "SD/MMC", "Vendor": "Generic", "Serial": "123",
+      "Id": "Generic-SD-123", "ConnectionBus": "usb", "Removable": true, "MediaRemovable": true,
+      "MediaAvailable": true, "Size": 31914983424}
+  }
+}

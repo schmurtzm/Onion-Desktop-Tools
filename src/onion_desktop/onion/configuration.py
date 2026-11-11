@@ -107,6 +107,7 @@ class FlagStore:
 
     def unknown_flags(self, schema: dict[str, list[FlagDefinition]]) -> list[str]:
         known = {d.filename for defs in schema.values() for d in defs}
+        known |= {k + "_" for k in known}
         if not self.exists():
             return []
         return sorted(

@@ -126,6 +126,7 @@ def download_release(
     checks pass.
     """
     cancel = cancel or CancelToken()
+    cancel.raise_if_cancelled()
     asset = release.asset
     if not ASSET_RE.match(asset.name):
         raise DownloadError(f"Unexpected asset name: {asset.name}")
@@ -228,6 +229,8 @@ def _download_attempt(
                 if done > expected:
                     raise DownloadError("Server sent more data than expected.")
                 progress(Progress(f"Downloading {part.name[:-5]}", done, expected))
+        if done < expected:
+            raise DownloadError(f"Connection closed early ({done} of {expected} bytes); resuming.")
     finally:
         resp.close()
 
