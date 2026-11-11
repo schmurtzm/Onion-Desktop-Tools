@@ -10,3 +10,5 @@ dist/
 packaging/appimage/work/
 *.AppImage
 *.zsync
+.coverage
+htmlcov/
